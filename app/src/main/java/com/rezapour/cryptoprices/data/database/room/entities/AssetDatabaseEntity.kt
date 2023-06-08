@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "asset")
-class AssetDatabaseEntity(
+data class AssetDatabaseEntity(
     @PrimaryKey @ColumnInfo(name = "asset_Id") val assetId: String,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "id_icon") val idIcon: String

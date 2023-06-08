@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class DataBaseMapper @Inject constructor() {
 
-    fun assetDatabaseEntityToAsset(asset: AssetDatabaseEntity): Asset =
+    private fun assetDatabaseEntityToAsset(asset: AssetDatabaseEntity): Asset =
         with(asset) {
             Asset(
                 assetId = assetId,
@@ -19,7 +19,7 @@ class DataBaseMapper @Inject constructor() {
         assets.map { assetDatabaseEntity -> assetDatabaseEntityToAsset(assetDatabaseEntity) }
 
 
-    fun assetToAssetDatabaseEntity(asset: Asset): AssetDatabaseEntity =
+    private fun assetToAssetDatabaseEntity(asset: Asset): AssetDatabaseEntity =
         with(asset) {
             AssetDatabaseEntity(
                 assetId = assetId,

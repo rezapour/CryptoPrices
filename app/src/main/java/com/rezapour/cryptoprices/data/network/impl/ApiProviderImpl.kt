@@ -14,7 +14,7 @@ class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMappe
             val response = api.getAssets()
             if (response.isSuccessful)
                 if (response.isResponseValid())
-                    return mapper.AssetNetworkEntityListToAssetList(response.body()!!)
+                    return mapper.assetNetworkEntityListToAssetList(response.body()!!)
                 else
                     throw DataProviderException(ExceptionMapper.toServerError())
             else

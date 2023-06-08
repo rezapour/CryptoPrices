@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class NetworkDataMapper @Inject constructor() {
 
-    private fun AssetNetwrokEntityToAsset(asset: AssetNetworkEntity): Asset =
+    private fun assetNetwrokEntityToAsset(asset: AssetNetworkEntity): Asset =
         with(asset) {
             Asset(
                 assetId = assetId,
@@ -15,7 +15,7 @@ class NetworkDataMapper @Inject constructor() {
             )
         }
 
-    fun AssetNetworkEntityListToAssetList(assets: List<AssetNetworkEntity>): List<Asset> =
+    fun assetNetworkEntityListToAssetList(assets: List<AssetNetworkEntity>): List<Asset> =
         assets.filter { assetNetworkEntity -> assetNetworkEntity.typeIsCrypto == 1 }
-            .map { assetNetworkEntity -> AssetNetwrokEntityToAsset(assetNetworkEntity) }
+            .map { assetNetworkEntity -> assetNetwrokEntityToAsset(assetNetworkEntity) }
 }
