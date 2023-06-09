@@ -10,4 +10,6 @@ interface DataBaseProvider {
     suspend fun insertAll(assets: List<Asset>)
 
     fun getAllAssets(): List<Asset>
+
+    suspend fun replaceAll(assets: List<Asset>)
 }

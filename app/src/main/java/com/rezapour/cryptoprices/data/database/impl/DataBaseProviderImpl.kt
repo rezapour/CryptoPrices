@@ -8,7 +8,7 @@ import com.rezapour.cryptoprices.model.Asset
 class DataBaseProviderImpl(private val dao: AssetDao, private val mapper: DataBaseMapper) :
     DataBaseProvider {
     override suspend fun insertAll(vararg assets: Asset) {
-        dao.insertAll(mapper.assetListToAssetDatabaseEntityList(listOf(*assets)))
+        insertAll(*assets)
     }
 
     override suspend fun insertAll(assets: List<Asset>) {
@@ -17,4 +17,9 @@ class DataBaseProviderImpl(private val dao: AssetDao, private val mapper: DataBa
 
     override fun getAllAssets(): List<Asset> =
         mapper.assetDatabaseEntityListToAssetList(dao.getAllAssets())
+
+    override suspend fun replaceAll(assets: List<Asset>) {
+        dao.deleteAll()
+        dao.insertAll(mapper.assetListToAssetDatabaseEntityList(assets))
+    }
 }
