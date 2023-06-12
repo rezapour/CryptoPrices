@@ -1,5 +1,6 @@
 package com.rezapour.cryptoprices.di.repository
 
+import com.rezapour.cryptoprices.data.database.DataBaseProvider
 import com.rezapour.cryptoprices.data.network.ApiProvider
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.data.repository.impl.AssetRepositoryImpl
@@ -17,6 +18,6 @@ class RepositoryModule {
     @Provides
     fun provideAssetRepository(
         apiProvider: ApiProvider,
-        databaseProvider: ApiProvider
+        databaseProvider: DataBaseProvider
     ): AssetRepository = AssetRepositoryImpl(apiProvider, databaseProvider)
 }

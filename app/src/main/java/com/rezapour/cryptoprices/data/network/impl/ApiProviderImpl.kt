@@ -1,5 +1,6 @@
 package com.rezapour.cryptoprices.data.network.impl
 
+import android.util.Log
 import com.rezapour.cryptoprices.data.exception.DataProviderException
 import com.rezapour.cryptoprices.data.network.ApiProvider
 import com.rezapour.cryptoprices.data.network.exception.ExceptionMapper
@@ -20,6 +21,7 @@ class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMappe
             else
                 throw DataProviderException(ExceptionMapper.toApiCallErrorMessage(response.code()))
         } catch (e: Exception) {
+            Log.d("REZAAPP",e.message.toString())
             if (e is DataProviderException)
                 throw e
             throw DataProviderException(ExceptionMapper.toInternetConnectionError())

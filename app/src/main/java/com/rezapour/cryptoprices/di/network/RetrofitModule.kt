@@ -16,7 +16,7 @@ object RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideRetrofitClient(retrofit: Retrofit): Retrofit {
+    fun provideRetrofitClient(): Retrofit {
         return RetrofitClient().retrofitProvider(Constance.BASE_URL, Constance.TIME_OUT)
     }
 

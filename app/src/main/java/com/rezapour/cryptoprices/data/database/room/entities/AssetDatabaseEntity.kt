@@ -8,5 +8,5 @@ import androidx.room.PrimaryKey
 data class AssetDatabaseEntity(
     @PrimaryKey @ColumnInfo(name = "asset_Id") val assetId: String,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "id_icon") val idIcon: String
+    @ColumnInfo(name = "id_icon") val idIcon: String?
 )

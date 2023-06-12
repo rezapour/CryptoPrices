@@ -21,6 +21,9 @@ class AssetListViewModel @Inject constructor(private val repository: AssetReposi
             emptyList()
         )
     )
+    init {
+        loadData()
+    }
 
     val dataState: StateFlow<DataState<List<Asset>>> = _dataState
 

@@ -17,7 +17,7 @@ data class AssetNetworkEntity(
     @Expose @SerializedName("volume_1hrs_usd") var volume1hrsUsd: Double,
     @Expose @SerializedName("volume_1day_usd") var volume1dayUsd: Double,
     @Expose @SerializedName("volume_1mth_usd") var volume1mthUsd: Double,
-    @Expose @SerializedName("id_icon") var idIcon: String,
+    @Expose @SerializedName("id_icon") var idIcon: String?,
     @Expose @SerializedName("data_start") var dataStart: String,
     @Expose @SerializedName("data_end") var dataEnd: String
 )
