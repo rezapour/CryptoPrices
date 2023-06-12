@@ -98,7 +98,6 @@ fun AssetItemState(
     })
 }
 
-
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AssetItem(
@@ -108,8 +107,9 @@ fun AssetItem(
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        //TODO glide error icon
         GlideImage(
-            model = asset.idIcon,
+            model = asset.imageUrl,
             contentDescription = "Hello",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -151,7 +151,6 @@ fun TopBar(viewModel: AssetListViewModel) {
                 if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
             },
             { showSearchBar = true })
-
 }
 
 @Composable
@@ -166,7 +165,7 @@ fun TopBarDefault(
                 painter = painterResource(id = R.drawable.baseline_favorite_24),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color.White
+                tint = Color.Gray
             )
         }
 
@@ -175,7 +174,7 @@ fun TopBarDefault(
                 painter = painterResource(id = R.drawable.baseline_search_24),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color.White
+                tint = Color.Gray
             )
         }
     }
@@ -210,7 +209,6 @@ fun SearchBar(onBackedClicked: () -> Unit, modifier: Modifier = Modifier) {
                 .heightIn(min = 56.dp)
         )
     }
-
 }
 
 @Preview

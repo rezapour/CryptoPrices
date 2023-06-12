@@ -15,7 +15,7 @@ class DataBaseMapper @Inject constructor() {
             Asset(
                 assetId = assetId,
                 name = name,
-                idIcon = idIcon,
+                imageUrl = idIcon,
                 favorite = favorite
             )
         }
@@ -43,7 +43,7 @@ class DataBaseMapper @Inject constructor() {
             AssetDatabaseEntity(
                 assetId = assetId,
                 name = name,
-                idIcon = idIcon
+                idIcon = imageUrl
             )
         }
 
@@ -56,7 +56,7 @@ class DataBaseMapper @Inject constructor() {
             Asset(
                 assetId = assetId,
                 name = name,
-                idIcon = idIcon,
+                imageUrl = idIcon,
                 favorite = true
             )
         }
@@ -66,7 +66,7 @@ class DataBaseMapper @Inject constructor() {
             AssetFavoriteDataBaseEntity(
                 assetId = assetId,
                 name = name,
-                idIcon = idIcon
+                idIcon = imageUrl
             )
         }
 

@@ -21,3 +21,8 @@ data class AssetNetworkEntity(
     @Expose @SerializedName("data_start") var dataStart: String,
     @Expose @SerializedName("data_end") var dataEnd: String
 )
+
+data class AssetIconNetWorkEntity(
+    @Expose @SerializedName("asset_id") var assetId: String,
+    @Expose @SerializedName("url") var url: String,
+)

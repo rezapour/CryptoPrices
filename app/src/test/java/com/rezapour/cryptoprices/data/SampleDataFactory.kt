@@ -1,7 +1,5 @@
 package com.rezapour.cryptoprices.data
 
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
 import com.rezapour.cryptoprices.data.database.room.entities.AssetDatabaseEntity
 import com.rezapour.cryptoprices.data.network.model.AssetNetworkEntity
 import com.rezapour.cryptoprices.model.Asset
@@ -12,7 +10,7 @@ object SampleDataFactory {
             Asset(
                 assetId = "BTC",
                 name = "Bitcoin",
-                idIcon = "4caf2b16-a017-4e26-a348-2cea69c34cba"
+                imageUrl = "4caf2b16-a017-4e26-a348-2cea69c34cba"
             )
         )
 
@@ -79,13 +77,13 @@ object SampleDataFactory {
         val asset1 = Asset(
             assetId = "BTC",
             name = "Bitcoin",
-            idIcon = "4caf2b16-a017-4e26-a348-2cea69c34cba"
+            imageUrl = "4caf2b16-a017-4e26-a348-2cea69c34cba"
         )
 
         val asset2 = Asset(
             assetId = "LTC",
             name = "Litecoin",
-            idIcon = "a201762f-1499-41ef-9b84-e0742cd00e48"
+            imageUrl = "a201762f-1499-41ef-9b84-e0742cd00e48"
         )
 
         return listOf(asset1, asset2)
