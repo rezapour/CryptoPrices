@@ -18,4 +18,6 @@ interface DataBaseProvider {
     suspend fun getFavorite(): List<Asset>
 
     suspend fun deleteFavorite(assetId: String)
+
+    suspend fun searchAsset(assetId:String):List<Asset>
 }

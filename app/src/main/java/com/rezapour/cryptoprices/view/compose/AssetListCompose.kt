@@ -1,6 +1,7 @@
 package com.rezapour.cryptoprices.view.compose
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,10 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActionScope
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,7 +66,7 @@ fun Content(viewModel: AssetListViewModel, modifier: Modifier = Modifier) {
     when (val state = viewModel.dataState.collectAsState().value) {
         is DataState.DefaultError -> Log.d("REZAAPP", "DefaultError")
         is DataState.Error -> Log.d("REZAAPP", stringResource(state.message))
-        DataState.Loading -> Log.d("REZAAPP", "Loading")
+        DataState.Loading -> CircularProgressIndicator()
         is DataState.Success -> AssetList(
             assets = state.data,
             { asset, checkState ->
@@ -137,13 +141,19 @@ fun AssetItem(
         }
     }
 }
-
+//TODO load data should change to chash not load again
 @Composable
 fun TopBar(viewModel: AssetListViewModel) {
     var showSearchBar by rememberSaveable { mutableStateOf(false) }
     var favoriteState by rememberSaveable { mutableStateOf(false) }
+    var text by rememberSaveable { mutableStateOf("") }
     if (showSearchBar)
-        SearchBar({ showSearchBar = false })
+        SearchBar(
+            { showSearchBar = false
+                viewModel.loadData()},
+            text = text,
+            { newText -> text = newText },
+            { text -> viewModel.search(text) })
     else
         TopBarDefault(
             {   //TODO only fetch data
@@ -151,6 +161,7 @@ fun TopBar(viewModel: AssetListViewModel) {
                 if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
             },
             { showSearchBar = true })
+
 }
 
 @Composable
@@ -182,33 +193,37 @@ fun TopBarDefault(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(onBackedClicked: () -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onBackedClicked, modifier = Modifier.padding(0.dp)) {
-            Icon(
+fun SearchBar(
+    onBackedClicked: () -> Unit,
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSearchClicked: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+        TextField(
+            value = text,
+            onValueChange = onTextChange,
+            leadingIcon={ Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = Color.White
-            )
-        }
-        TextField(
-            value = "",
-            onValueChange = {},
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = null)
-            },
+                Modifier.clickable { onBackedClicked() })},
             trailingIcon = {
-                Icon(imageVector = Icons.Default.Close, contentDescription = null)
-            }, colors = TextFieldDefaults.textFieldColors(
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    Modifier.clickable { onSearchClicked(text) })
+            },
+            colors = TextFieldDefaults.textFieldColors(
                 containerColor = MaterialTheme.colorScheme.surface
-            ), placeholder = {
+            ),
+            placeholder = {
                 Text("Search")
-            }, modifier = modifier
+            },
+            maxLines = 1,
+            modifier = modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
         )
-    }
 }
 
 @Preview
@@ -222,13 +237,5 @@ fun AssetItemPreview() {
         ), false, {}
     )
 }
-
-@Preview
-@Composable
-fun SearchBarPreview() {
-    SearchBar({})
-}
-
-
 
 

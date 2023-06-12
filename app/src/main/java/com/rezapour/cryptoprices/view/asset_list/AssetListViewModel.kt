@@ -44,9 +44,16 @@ class AssetListViewModel @Inject constructor(private val repository: AssetReposi
         viewModelScope.launch(Dispatchers.IO) { repository.deleteFavorite(assetId) }
     }
 
-    //Todo empty
+    //Todo emptyList message
     fun getFavorite() {
         _dataState.value = DataState.Loading
         viewModelScope.launch { _dataState.value = DataState.Success(repository.getFavorite()) }
+    }
+    //Todo emptyList message
+    fun search(assetId: String) {
+        _dataState.value = DataState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            _dataState.value = DataState.Success(repository.searchAsset(assetId))
+        }
     }
 }

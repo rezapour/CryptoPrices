@@ -34,4 +34,11 @@ class DataBaseProviderImpl(private val dao: AssetDao, private val mapper: DataBa
     override suspend fun deleteFavorite(assetId: String) {
         dao.deleteFavorite(assetId)
     }
+
+    override suspend fun searchAsset(assetId: String): List<Asset> {
+        return mapper.assetDatabaseEntityListToAssetList(
+            dao.searchAsset(assetId),
+            dao.getFavorite()
+        )
+    }
 }
