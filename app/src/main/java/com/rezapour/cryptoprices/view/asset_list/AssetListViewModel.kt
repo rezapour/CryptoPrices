@@ -21,6 +21,7 @@ class AssetListViewModel @Inject constructor(private val repository: AssetReposi
             emptyList()
         )
     )
+
     init {
         loadData()
     }
@@ -33,5 +34,19 @@ class AssetListViewModel @Inject constructor(private val repository: AssetReposi
         viewModelScope.launch(Dispatchers.IO) {
             _dataState.value = repository.getAssets()
         }
+    }
+
+    fun addFavorite(asset: Asset) {
+        viewModelScope.launch(Dispatchers.IO) { repository.insertFavorite(asset) }
+    }
+
+    fun deleteFavorite(assetId: String) {
+        viewModelScope.launch(Dispatchers.IO) { repository.deleteFavorite(assetId) }
+    }
+
+    //Todo empty
+    fun getFavorite() {
+        _dataState.value = DataState.Loading
+        viewModelScope.launch { _dataState.value = DataState.Success(repository.getFavorite()) }
     }
 }

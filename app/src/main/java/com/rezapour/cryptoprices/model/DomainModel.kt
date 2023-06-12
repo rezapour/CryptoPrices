@@ -6,5 +6,6 @@ import com.google.gson.annotations.SerializedName
 data class Asset(
     var assetId: String,
     var name: String,
-    var idIcon: String?
+    var idIcon: String?,
+    val favorite: Boolean = false
 )

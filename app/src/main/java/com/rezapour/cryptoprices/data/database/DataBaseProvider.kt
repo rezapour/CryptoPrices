@@ -9,7 +9,13 @@ interface DataBaseProvider {
 
     suspend fun insertAll(assets: List<Asset>)
 
-    fun getAllAssets(): List<Asset>
+    suspend fun getAllAssets(): List<Asset>
 
     suspend fun replaceAll(assets: List<Asset>)
+
+    suspend fun insertFavorite(asset: Asset)
+
+    suspend fun getFavorite(): List<Asset>
+
+    suspend fun deleteFavorite(assetId: String)
 }

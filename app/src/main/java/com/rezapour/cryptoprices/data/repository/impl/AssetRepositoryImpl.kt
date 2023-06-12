@@ -23,4 +23,12 @@ class AssetRepositoryImpl constructor(
             DataState.DefaultError(databaseProvider.getAllAssets())
         }
     }
+
+    override suspend fun insertFavorite(asset: Asset) {
+        databaseProvider.insertFavorite(asset)
+    }
+
+    override suspend fun getFavorite(): List<Asset> = databaseProvider.getFavorite()
+
+    override suspend fun deleteFavorite(assetId: String) = databaseProvider.deleteFavorite(assetId)
 }

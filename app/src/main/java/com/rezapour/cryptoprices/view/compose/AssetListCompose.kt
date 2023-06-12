@@ -50,33 +50,52 @@ import com.rezapour.cryptoprices.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetListScreen(viewModel: AssetListViewModel = viewModel(), modifier: Modifier = Modifier) {
-    when (val state = viewModel.dataState.collectAsState().value) {
-        is DataState.DefaultError -> Log.d("REZAAPP", "DefaultError")
-        is DataState.Error -> Log.d("REZAAPP", stringResource(state.message))
-        DataState.Loading -> Log.d("REZAAPP", "Loading")
-        is DataState.Success -> AssetList(assets = state.data)
-    }
 
-    Scaffold(topBar = { TopBar() }) { padding ->
-        AssetList(assets = arrayListOf(), Modifier.padding(padding))
+    Scaffold(topBar = { TopBar(viewModel) }) { padding ->
+        Content(viewModel, Modifier.padding(padding))
     }
 
 }
 
 @Composable
-fun AssetList(assets: List<Asset>, modifier: Modifier = Modifier) {
+fun Content(viewModel: AssetListViewModel, modifier: Modifier = Modifier) {
+    when (val state = viewModel.dataState.collectAsState().value) {
+        is DataState.DefaultError -> Log.d("REZAAPP", "DefaultError")
+        is DataState.Error -> Log.d("REZAAPP", stringResource(state.message))
+        DataState.Loading -> Log.d("REZAAPP", "Loading")
+        is DataState.Success -> AssetList(
+            assets = state.data,
+            { asset, checkState ->
+                if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
+            })
+    }
+}
+
+@Composable
+fun AssetList(
+    assets: List<Asset>,
+    onFavoriteClicked: (Asset, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(modifier = modifier) {
         items(items = assets, key = { asset -> asset.assetId }) { asset ->
-            AssetItemState(asset = asset)
+            AssetItemState(asset = asset, onFavoriteClicked)
         }
     }
 }
 
 @Composable
-fun AssetItemState(asset: Asset, modifier: Modifier = Modifier) {
-    var checkState by rememberSaveable { mutableStateOf(false) }
+fun AssetItemState(
+    asset: Asset,
+    onFavoriteClicked: (Asset, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var checkState by rememberSaveable { mutableStateOf(asset.favorite) }
 
-    AssetItem(asset, checkState, { checkState = !checkState })
+    AssetItem(asset, checkState, {
+        checkState = !checkState
+        onFavoriteClicked(asset, checkState)
+    })
 }
 
 
@@ -120,12 +139,18 @@ fun AssetItem(
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(viewModel: AssetListViewModel) {
     var showSearchBar by rememberSaveable { mutableStateOf(false) }
+    var favoriteState by rememberSaveable { mutableStateOf(false) }
     if (showSearchBar)
         SearchBar({ showSearchBar = false })
     else
-        TopBarDefault({}, { showSearchBar = true })
+        TopBarDefault(
+            {   //TODO only fetch data
+                favoriteState = !favoriteState
+                if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
+            },
+            { showSearchBar = true })
 
 }
 
@@ -198,12 +223,6 @@ fun AssetItemPreview() {
             "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png"
         ), false, {}
     )
-}
-
-@Preview
-@Composable
-fun TopBarPreview() {
-    TopBar()
 }
 
 @Preview
