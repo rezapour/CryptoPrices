@@ -12,11 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActionScope
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,18 +39,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.view.asset_list.AssetListViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rezapour.cryptoprices.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssetListScreen(viewModel: AssetListViewModel = viewModel(), modifier: Modifier = Modifier) {
+fun AssetListScreen(
+    viewModel: AssetListViewModel = hiltViewModel<AssetListViewModel>(),
+    modifier: Modifier = Modifier,
+    OnNavigateToDetail: () -> Unit
+) {
 
     Scaffold(topBar = { TopBar(viewModel) }) { padding ->
         Content(viewModel, Modifier.padding(padding))
@@ -141,6 +142,7 @@ fun AssetItem(
         }
     }
 }
+
 //TODO load data should change to chash not load again
 @Composable
 fun TopBar(viewModel: AssetListViewModel) {
@@ -149,8 +151,10 @@ fun TopBar(viewModel: AssetListViewModel) {
     var text by rememberSaveable { mutableStateOf("") }
     if (showSearchBar)
         SearchBar(
-            { showSearchBar = false
-                viewModel.loadData()},
+            {
+                showSearchBar = false
+                viewModel.loadData()
+            },
             text = text,
             { newText -> text = newText },
             { text -> viewModel.search(text) })
@@ -200,30 +204,32 @@ fun SearchBar(
     onSearchClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-        TextField(
-            value = text,
-            onValueChange = onTextChange,
-            leadingIcon={ Icon(
+    TextField(
+        value = text,
+        onValueChange = onTextChange,
+        leadingIcon = {
+            Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
-                Modifier.clickable { onBackedClicked() })},
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    Modifier.clickable { onSearchClicked(text) })
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            placeholder = {
-                Text("Search")
-            },
-            maxLines = 1,
-            modifier = modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-        )
+                Modifier.clickable { onBackedClicked() })
+        },
+        trailingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                Modifier.clickable { onSearchClicked(text) })
+        },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        placeholder = {
+            Text("Search")
+        },
+        maxLines = 1,
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+    )
 }
 
 @Preview
