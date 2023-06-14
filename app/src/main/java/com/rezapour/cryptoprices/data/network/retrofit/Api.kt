@@ -13,7 +13,7 @@ interface Api {
     @GET("assets")
     suspend fun getAssets(): Response<List<AssetNetworkEntity>>
 
-    @GET("assets/icons/32")
+    @GET("assets/icons/64")
     suspend fun getIcons(): Response<List<AssetIconNetWorkEntity>>
 
     @GET("assets/{assetId}")

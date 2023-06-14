@@ -4,4 +4,6 @@
     <string name="error_access_denied">Please login in your account.</string>
     <string name="error_server_error">Failed to connect to server. Please try again.</string>
     <string name="error_default_message">Something went wrong!</string>
+    <string name="retry">Retry</string>
+    <string name="cryptocurrencies">Cryptocurrencies</string>
 </resources>

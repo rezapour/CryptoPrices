@@ -1,14 +1,21 @@
 package com.rezapour.cryptoprices.view.compose
 
+import android.graphics.Paint.Style
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -21,13 +28,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +60,8 @@ import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
 import com.rezapour.cryptoprices.R
+import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
+import kotlinx.coroutines.CoroutineScope
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,38 +71,107 @@ fun AssetListScreen(
     modifier: Modifier = Modifier,
     OnNavigateToDetail: () -> Unit
 ) {
-
-    Scaffold(topBar = { TopBar(viewModel) }) { padding ->
-        Content(viewModel, Modifier.padding(padding))
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    Scaffold(
+        topBar = { TopBar(viewModel) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { padding ->
+        Content(viewModel, snackbarHostState, scope, Modifier.padding(padding))
     }
 
 }
 
+//TODO make a cleaner code
 @Composable
-fun Content(viewModel: AssetListViewModel, modifier: Modifier = Modifier) {
+fun Content(
+    viewModel: AssetListViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope,
+    modifier: Modifier = Modifier
+) {
     when (val state = viewModel.dataState.collectAsState().value) {
-        is DataState.DefaultError -> Log.d("REZAAPP", "DefaultError")
-        is DataState.Error -> Log.d("REZAAPP", stringResource(state.message))
-        DataState.Loading -> CircularProgressIndicator()
+        is DataState.DefaultError -> {
+            SnackBarItem(
+                snackbarHostState,
+                coroutineScope,
+                stringResource(R.string.error_default_message),
+                stringResource(R.string.retry)
+            ) { viewModel.loadData() }
+
+            AssetList(
+                assets = state.data ?: emptyList(),
+                { asset, checkState ->
+                    if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
+                }, modifier = modifier
+            )
+        }
+
+        is DataState.Error -> {
+            SnackBarItem(
+                snackbarHostState,
+                coroutineScope,
+                stringResource(id = state.message),
+                stringResource(R.string.retry)
+            ) { viewModel.loadData() }
+
+            AssetList(
+                assets = state.data,
+                { asset, checkState ->
+                    if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
+                }, modifier = modifier
+            )
+        }
+
+        DataState.Loading -> Loading(modifier)
         is DataState.Success -> AssetList(
             assets = state.data,
             { asset, checkState ->
                 if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-            })
+            }, modifier = modifier
+        )
     }
+}
+
+@Composable
+fun Loading(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+
 }
 
 @Composable
 fun AssetList(
     assets: List<Asset>,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
+    useLocalData: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier) {
-        items(items = assets, key = { asset -> asset.assetId }) { asset ->
-            AssetItemState(asset = asset, onFavoriteClicked)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (useLocalData)
+            Surface(color = MaterialTheme.colorScheme.error, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "This data is outdated please refresh.",
+                    modifier = Modifier.padding(4.dp),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+
+
+        LazyColumn(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(items = assets, key = { asset -> asset.assetId }) { asset ->
+                AssetItemState(asset = asset, onFavoriteClicked)
+            }
         }
     }
+
 }
 
 @Composable
@@ -111,39 +196,54 @@ fun AssetItem(
     onCheckedChanged: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        //TODO glide error icon
-        GlideImage(
-            model = asset.imageUrl,
-            contentDescription = "Hello",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .padding(4.dp)
-        )
-
-        Column(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1f)
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = asset.name)
-            Text(text = asset.assetId, modifier = modifier.padding(top = 4.dp))
-        }
+            //TODO glide error icon
+            GlideImage(
+                model = asset.imageUrl,
+                contentDescription = "Hello",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .padding(4.dp)
+            ) {
+                it.error(R.drawable.no_image)
+            }
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(1f)
+            ) {
+                Text(text = asset.name, style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = asset.assetId,
+                    modifier = modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
 
-        IconButton(onClick = onCheckedChanged, modifier = Modifier.padding(0.dp)) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_favorite_24),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = if (checked) Color.Red else Color.Black
-            )
+            IconButton(onClick = onCheckedChanged, modifier = Modifier.padding(0.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_favorite_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = if (checked) Color.Red else Color.LightGray
+                )
+            }
         }
     }
 }
 
 //TODO load data should change to chash not load again
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(viewModel: AssetListViewModel) {
     var showSearchBar by rememberSaveable { mutableStateOf(false) }
@@ -159,12 +259,14 @@ fun TopBar(viewModel: AssetListViewModel) {
             { newText -> text = newText },
             { text -> viewModel.search(text) })
     else
-        TopBarDefault(
-            {   //TODO only fetch data
-                favoriteState = !favoriteState
-                if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
-            },
-            { showSearchBar = true })
+        TopAppBar(title = { Text(text = stringResource(R.string.cryptocurrencies)) }, actions = {
+            TopBarDefault(
+                {   //TODO only fetch data
+                    favoriteState = !favoriteState
+                    if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
+                },
+                { showSearchBar = true })
+        })
 
 }
 
@@ -174,7 +276,7 @@ fun TopBarDefault(
     onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+    Row(modifier) {
         IconButton(onClick = onFavoriteClicked, modifier = Modifier.padding(0.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.baseline_favorite_24),
@@ -235,13 +337,31 @@ fun SearchBar(
 @Preview
 @Composable
 fun AssetItemPreview() {
-    AssetItem(
-        Asset(
-            "BTC",
-            "BitCoin",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png"
-        ), false, {}
-    )
+    CryptoPricesTheme() {
+        AssetItem(
+            Asset(
+                "BTC",
+                "BitCoin",
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png"
+            ), false, {}
+        )
+    }
+
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFBFE)
+@Composable
+fun AssetListPreview() {
+    CryptoPricesTheme() {
+        AssetList(
+            listOf(
+                Asset("BTC", "Bitcoin", ""),
+                Asset("BTC1", "Bitcoin", ""),
+                Asset("BTC2", "Bitcoin", ""),
+                Asset("BTC3", "Bitcoin", "")
+            ),
+            { asset: Asset, b: Boolean -> })
+    }
 }
 
 
