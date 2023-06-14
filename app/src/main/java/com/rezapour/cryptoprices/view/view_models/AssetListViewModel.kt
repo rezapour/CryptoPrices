@@ -1,4 +1,4 @@
-package com.rezapour.cryptoprices.view.asset_list
+package com.rezapour.cryptoprices.view.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,13 +21,11 @@ class AssetListViewModel @Inject constructor(private val repository: AssetReposi
             emptyList()
         )
     )
+    val dataState: StateFlow<DataState<List<Asset>>> = _dataState
 
     init {
         loadData()
     }
-
-    val dataState: StateFlow<DataState<List<Asset>>> = _dataState
-
     //Todo change dispatcher
     fun loadData() {
         _dataState.value = DataState.Loading

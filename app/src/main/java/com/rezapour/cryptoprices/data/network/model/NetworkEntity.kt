@@ -17,6 +17,7 @@ data class AssetNetworkEntity(
     @Expose @SerializedName("volume_1hrs_usd") var volume1hrsUsd: Double,
     @Expose @SerializedName("volume_1day_usd") var volume1dayUsd: Double,
     @Expose @SerializedName("volume_1mth_usd") var volume1mthUsd: Double,
+    @Expose @SerializedName("price_usd") var priceUsd: Double,
     @Expose @SerializedName("id_icon") var idIcon: String?,
     @Expose @SerializedName("data_start") var dataStart: String,
     @Expose @SerializedName("data_end") var dataEnd: String
@@ -25,4 +26,11 @@ data class AssetNetworkEntity(
 data class AssetIconNetWorkEntity(
     @Expose @SerializedName("asset_id") var assetId: String,
     @Expose @SerializedName("url") var url: String,
+)
+
+data class ExchangeRateNetworkEntity(
+    @Expose @SerializedName("time") var time: String,
+    @Expose @SerializedName("asset_id_base") var assetIdBase: String,
+    @Expose @SerializedName("asset_id_quote") var assetIdQuote: String,
+    @Expose @SerializedName("rate") var rate: Double
 )

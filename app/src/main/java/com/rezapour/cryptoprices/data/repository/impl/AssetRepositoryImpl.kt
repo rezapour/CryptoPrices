@@ -6,6 +6,7 @@ import com.rezapour.cryptoprices.data.exception.DataProviderException
 import com.rezapour.cryptoprices.data.network.ApiProvider
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.model.Asset
+import com.rezapour.cryptoprices.model.AssetDetail
 
 class AssetRepositoryImpl constructor(
     private val apiProvider: ApiProvider,
@@ -33,5 +34,9 @@ class AssetRepositoryImpl constructor(
     override suspend fun deleteFavorite(assetId: String) = databaseProvider.deleteFavorite(assetId)
     override suspend fun searchAsset(assetId: String): List<Asset> {
         return databaseProvider.searchAsset(assetId)
+    }
+
+    override suspend fun getAssetDetail(assetIdBase: String, assetIdQuote: String): AssetDetail {
+        return apiProvider.getAssetDetail(assetIdBase,assetIdQuote)
     }
 }

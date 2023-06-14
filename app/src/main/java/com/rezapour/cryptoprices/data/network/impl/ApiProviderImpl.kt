@@ -8,6 +8,7 @@ import com.rezapour.cryptoprices.data.network.mapper.NetworkDataMapper
 import com.rezapour.cryptoprices.data.network.model.AssetIconNetWorkEntity
 import com.rezapour.cryptoprices.data.network.retrofit.Api
 import com.rezapour.cryptoprices.model.Asset
+import com.rezapour.cryptoprices.model.AssetDetail
 import retrofit2.Response
 
 class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMapper) : ApiProvider {
@@ -15,16 +16,42 @@ class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMappe
     override suspend fun getAssets(): List<Asset> {
         try {
             val assetResponse = api.getAssets()
-            val assetIcons=api.getIcons()
+            val assetIcons = api.getIcons()
             if (assetResponse.isSuccessful && assetIcons.isSuccessful)
                 if (assetResponse.isResponseValid() && assetIcons.isResponseValid())
-                    return mapper.assetNetworkEntityListToAssetList(assetResponse.body()!!,assetIcons.body()!!)
+                    return mapper.assetNetworkEntityListToAssetList(
+                        assetResponse.body()!!,
+                        assetIcons.body()!!
+                    )
+                else
+                    throw DataProviderException(ExceptionMapper.toServerError())
+            else
+                throw DataProviderException(ExceptionMapper.toApiCallErrorMessage(assetResponse.code())) // the problem is here
+        } catch (e: Exception) {
+            if (e is DataProviderException)
+                throw e
+            throw DataProviderException(ExceptionMapper.toInternetConnectionError())
+        }
+    }
+
+    override suspend fun getAssetDetail(
+        assetIdBase: String,
+        assetIdQuote: String
+    ): AssetDetail {
+        try {
+            val assetResponse = api.getAssetDetail(assetIdBase)
+            val assetRate = api.getExchangeRate(assetIdBase, assetIdQuote)
+            if (assetResponse.isSuccessful && assetRate.isSuccessful)
+                if (assetResponse.isResponseValid() && assetRate.isResponseValid())
+                    return mapper.assetNetworkEntityToAssetDetail(
+                        assetResponse.body()!![0],
+                        assetRate.body()!!
+                    )
                 else
                     throw DataProviderException(ExceptionMapper.toServerError())
             else
                 throw DataProviderException(ExceptionMapper.toApiCallErrorMessage(assetResponse.code()))
         } catch (e: Exception) {
-            Log.d("REZAAPP",e.message.toString())
             if (e is DataProviderException)
                 throw e
             throw DataProviderException(ExceptionMapper.toInternetConnectionError())

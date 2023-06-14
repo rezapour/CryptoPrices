@@ -44,14 +44,14 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
-import com.rezapour.cryptoprices.view.asset_list.AssetListViewModel
+import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
 import com.rezapour.cryptoprices.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetListScreen(
-    viewModel: AssetListViewModel = hiltViewModel<AssetListViewModel>(),
+    viewModel: AssetListViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     OnNavigateToDetail: () -> Unit
 ) {

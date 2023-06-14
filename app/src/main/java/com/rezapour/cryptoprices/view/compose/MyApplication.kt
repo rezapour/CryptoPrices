@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 fun MyApplication(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "assetList"
+    startDestination: String = "detail"
 ) {
 
     NavHost(
