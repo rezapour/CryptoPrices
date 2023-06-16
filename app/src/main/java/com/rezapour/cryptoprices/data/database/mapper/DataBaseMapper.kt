@@ -1,7 +1,7 @@
 package com.rezapour.cryptoprices.data.database.mapper
 
 import com.rezapour.cryptoprices.data.database.room.entities.AssetDatabaseEntity
-import com.rezapour.cryptoprices.data.database.room.entities.AssetFavoriteDataBaseEntity
+import com.rezapour.cryptoprices.data.database.room.entities.FavoriteDataBaseEntity
 import com.rezapour.cryptoprices.model.Asset
 import javax.inject.Inject
 
@@ -15,26 +15,28 @@ class DataBaseMapper @Inject constructor() {
             Asset(
                 assetId = assetId,
                 name = name,
-                imageUrl = idIcon,
-                favorite = favorite
+                idIcon = idIcon,
+                dataQuoteStart = dataQuoteStart,
+                dataQuoteEnd = dataQuoteEnd,
+                dataOrderbookStart = dataOrderbookStart,
+                dataOrderbookEnd = dataOrderbookEnd,
+                dataTradeStart = dataTradeStart,
+                dataTradeEnd = dataTradeEnd,
+                dataSymbolsCount = dataSymbolsCount,
+                volume1hrsUsd = volume1hrsUsd,
+                volume1dayUsd = volume1dayUsd,
+                volume1mthUsd = volume1mthUsd,
+                priceUsd = priceUsd,
+                dataStart = dataStart,
+                dataEnd = dataEnd
             )
         }
 
-    //TODO make it cleaner
     fun assetDatabaseEntityListToAssetList(
-        assets: List<AssetDatabaseEntity>,
-        favorites: List<AssetFavoriteDataBaseEntity>
+        assets: List<AssetDatabaseEntity>
     ): List<Asset> =
         assets.map { assetDatabaseEntity ->
-            assetDatabaseEntityToAsset(
-                assetDatabaseEntity, favorites.contains(
-                    AssetFavoriteDataBaseEntity(
-                        assetDatabaseEntity.assetId,
-                        assetDatabaseEntity.name,
-                        assetDatabaseEntity.idIcon
-                    )
-                )
-            )
+            assetDatabaseEntityToAsset(assetDatabaseEntity)
         }
 
 
@@ -43,33 +45,76 @@ class DataBaseMapper @Inject constructor() {
             AssetDatabaseEntity(
                 assetId = assetId,
                 name = name,
-                idIcon = imageUrl
+                idIcon = idIcon,
+                dataQuoteStart = dataQuoteStart,
+                dataQuoteEnd = dataQuoteEnd,
+                dataOrderbookStart = dataOrderbookStart,
+                dataOrderbookEnd = dataOrderbookEnd,
+                dataTradeStart = dataTradeStart,
+                dataTradeEnd = dataTradeEnd,
+                dataSymbolsCount = dataSymbolsCount,
+                volume1hrsUsd = volume1hrsUsd,
+                volume1dayUsd = volume1dayUsd,
+                volume1mthUsd = volume1mthUsd,
+                priceUsd = priceUsd,
+                dataStart = dataStart,
+                dataEnd = dataEnd
             )
         }
 
     fun assetListToAssetDatabaseEntityList(assets: List<Asset>): List<AssetDatabaseEntity> =
         assets.map { asset -> assetToAssetDatabaseEntity(asset) }
 
-
-    fun assetFavoriteDatabaseEntityToAsset(asset: AssetFavoriteDataBaseEntity): Asset =
+    fun favoriteDatabaseEntityToAsset(
+        asset: FavoriteDataBaseEntity
+    ): Asset =
         with(asset) {
             Asset(
                 assetId = assetId,
                 name = name,
-                imageUrl = idIcon,
-                favorite = true
+                idIcon = idIcon,
+                dataQuoteStart = dataQuoteStart,
+                dataQuoteEnd = dataQuoteEnd,
+                dataOrderbookStart = dataOrderbookStart,
+                dataOrderbookEnd = dataOrderbookEnd,
+                dataTradeStart = dataTradeStart,
+                dataTradeEnd = dataTradeEnd,
+                dataSymbolsCount = dataSymbolsCount,
+                volume1hrsUsd = volume1hrsUsd,
+                volume1dayUsd = volume1dayUsd,
+                volume1mthUsd = volume1mthUsd,
+                priceUsd = priceUsd,
+                dataStart = dataStart,
+                dataEnd = dataEnd
             )
         }
 
-    fun assetToAssetFavoriteDatabaseEntity(asset: Asset): AssetFavoriteDataBaseEntity =
+    fun assetToFavoriteDatabaseEntity(
+        asset: Asset
+    ): FavoriteDataBaseEntity =
         with(asset) {
-            AssetFavoriteDataBaseEntity(
+            FavoriteDataBaseEntity(
                 assetId = assetId,
                 name = name,
-                idIcon = imageUrl
+                idIcon = idIcon,
+                dataQuoteStart = dataQuoteStart,
+                dataQuoteEnd = dataQuoteEnd,
+                dataOrderbookStart = dataOrderbookStart,
+                dataOrderbookEnd = dataOrderbookEnd,
+                dataTradeStart = dataTradeStart,
+                dataTradeEnd = dataTradeEnd,
+                dataSymbolsCount = dataSymbolsCount,
+                volume1hrsUsd = volume1hrsUsd,
+                volume1dayUsd = volume1dayUsd,
+                volume1mthUsd = volume1mthUsd,
+                priceUsd = priceUsd,
+                dataStart = dataStart,
+                dataEnd = dataEnd
             )
         }
 
-    fun assetFavoriteDatabaseEntityListToAssetList(assets: List<AssetFavoriteDataBaseEntity>): List<Asset> =
-        assets.map { assetDatabaseEntity -> assetFavoriteDatabaseEntityToAsset(assetDatabaseEntity) }
+    fun favoriteDatabaseEntityListToAssetList(favoriteList: List<FavoriteDataBaseEntity>): List<Asset> =
+        favoriteList.map { favorite -> favoriteDatabaseEntityToAsset(favorite) }
+
+
 }

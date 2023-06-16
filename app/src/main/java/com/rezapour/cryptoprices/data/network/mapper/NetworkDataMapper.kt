@@ -11,29 +11,39 @@ class NetworkDataMapper @Inject constructor() {
 
     private fun assetNetworkEntityToAsset(
         asset: AssetNetworkEntity,
-        icon: AssetIconNetWorkEntity?
     ): Asset =
         with(asset) {
             Asset(
                 assetId = assetId,
                 name = name,
-                imageUrl = icon?.url
+                idIcon = idIcon,
+                dataQuoteStart = dataQuoteStart,
+                dataQuoteEnd = dataQuoteEnd,
+                dataOrderbookStart = dataOrderbookStart,
+                dataOrderbookEnd = dataOrderbookEnd,
+                dataTradeStart = dataTradeStart,
+                dataTradeEnd = dataTradeEnd,
+                dataSymbolsCount = dataSymbolsCount,
+                volume1hrsUsd = volume1hrsUsd,
+                volume1dayUsd = volume1dayUsd,
+                volume1mthUsd = volume1mthUsd,
+                priceUsd = priceUsd,
+                dataStart = dataStart,
+                dataEnd = dataEnd
             )
         }
 
     fun assetNetworkEntityListToAssetList(
-        assets: List<AssetNetworkEntity>,
-        icons: List<AssetIconNetWorkEntity>
+        assets: List<AssetNetworkEntity>
     ): List<Asset> =
         assets.filter { assetNetworkEntity -> assetNetworkEntity.typeIsCrypto == 1 }
             .map { assetNetworkEntity ->
                 assetNetworkEntityToAsset(
-                    assetNetworkEntity,
-                    icons.find { icon -> icon.assetId == assetNetworkEntity.assetId })
+                    assetNetworkEntity
+                )
             }
 
-
-    fun assetNetworkEntityToAssetDetail(
+    fun assetDetailNetworkEntityToAssetDetail(
         asset: AssetNetworkEntity,
         exchange: ExchangeRateNetworkEntity
     ): AssetDetail =

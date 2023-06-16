@@ -1,28 +1,20 @@
 package com.rezapour.cryptoprices.view.compose
 
-import android.graphics.Paint.Style
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,16 +42,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.rezapour.cryptoprices.R
+import com.rezapour.cryptoprices.data.Constance
 import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
+import com.rezapour.cryptoprices.model.AssetItem
 import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
-import com.rezapour.cryptoprices.R
-import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
 import kotlinx.coroutines.CoroutineScope
 
 
@@ -99,7 +90,7 @@ fun Content(
             ) { viewModel.loadData() }
 
             AssetList(
-                assets = state.data ?: emptyList(),
+                assetItems = state.data ?: emptyList(),
                 { asset, checkState ->
                     if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
                 }, modifier = modifier
@@ -115,7 +106,7 @@ fun Content(
             ) { viewModel.loadData() }
 
             AssetList(
-                assets = state.data,
+                assetItems = state.data,
                 { asset, checkState ->
                     if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
                 }, modifier = modifier
@@ -124,7 +115,7 @@ fun Content(
 
         DataState.Loading -> Loading(modifier)
         is DataState.Success -> AssetList(
-            assets = state.data,
+            assetItems = state.data,
             { asset, checkState ->
                 if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
             }, modifier = modifier
@@ -133,16 +124,8 @@ fun Content(
 }
 
 @Composable
-fun Loading(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-
-}
-
-@Composable
 fun AssetList(
-    assets: List<Asset>,
+    assetItems: List<AssetItem>,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
     useLocalData: Boolean = true,
     modifier: Modifier = Modifier
@@ -166,8 +149,8 @@ fun AssetList(
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(items = assets, key = { asset -> asset.assetId }) { asset ->
-                AssetItemState(asset = asset, onFavoriteClicked)
+            items(items = assetItems, key = { assetItem -> assetItem.asset.assetId }) { assetItem ->
+                AssetItemState(assetItem = assetItem, onFavoriteClicked)
             }
         }
     }
@@ -176,15 +159,15 @@ fun AssetList(
 
 @Composable
 fun AssetItemState(
-    asset: Asset,
+    assetItem: AssetItem,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var checkState by rememberSaveable { mutableStateOf(asset.favorite) }
+    var checkState by rememberSaveable { mutableStateOf(assetItem.favorite) }
 
-    AssetItem(asset, checkState, {
+    AssetItem(assetItem.asset, checkState, {
         checkState = !checkState
-        onFavoriteClicked(asset, checkState)
+        onFavoriteClicked(assetItem.asset, checkState)
     })
 }
 
@@ -205,9 +188,8 @@ fun AssetItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            //TODO glide error icon
             GlideImage(
-                model = asset.imageUrl,
+                model = Constance.getImageUrl(asset.idIcon?.replace("-","")),
                 contentDescription = "Hello",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -333,35 +315,3 @@ fun SearchBar(
             .heightIn(min = 56.dp)
     )
 }
-
-@Preview
-@Composable
-fun AssetItemPreview() {
-    CryptoPricesTheme() {
-        AssetItem(
-            Asset(
-                "BTC",
-                "BitCoin",
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png"
-            ), false, {}
-        )
-    }
-
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFBFE)
-@Composable
-fun AssetListPreview() {
-    CryptoPricesTheme() {
-        AssetList(
-            listOf(
-                Asset("BTC", "Bitcoin", ""),
-                Asset("BTC1", "Bitcoin", ""),
-                Asset("BTC2", "Bitcoin", ""),
-                Asset("BTC3", "Bitcoin", "")
-            ),
-            { asset: Asset, b: Boolean -> })
-    }
-}
-
-

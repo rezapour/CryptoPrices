@@ -4,8 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "asset")
-data class AssetDatabaseEntity(
+@Entity(tableName = "favorite")
+data class FavoriteDataBaseEntity(
     @PrimaryKey @ColumnInfo("asset_id") var assetId: String,
     @ColumnInfo("name") var name: String,
     @ColumnInfo("data_quote_start") var dataQuoteStart: String?,
@@ -21,8 +21,5 @@ data class AssetDatabaseEntity(
     @ColumnInfo("price_usd") var priceUsd: Double,
     @ColumnInfo("id_icon") var idIcon: String?,
     @ColumnInfo("data_start") var dataStart: String?,
-    @ColumnInfo("data_end") var dataEnd: String?,
-    @ColumnInfo("exchnage_time") var exchnageTime: String? = null,
-    @ColumnInfo("id_Quote") var assetIdQuote: String? = null,
-    @ColumnInfo("rate") var rate: Double? = null
+    @ColumnInfo("data_end") var dataEnd: String?
 )

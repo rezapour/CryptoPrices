@@ -1,42 +1,43 @@
 package com.rezapour.cryptoprices.data.repository.impl
 
-import com.rezapour.cryptoprices.data.DataState
-import com.rezapour.cryptoprices.data.database.DataBaseProvider
-import com.rezapour.cryptoprices.data.exception.DataProviderException
+import android.util.Log
+import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
+import com.rezapour.cryptoprices.data.database.room.dao.AssetDao
 import com.rezapour.cryptoprices.data.network.ApiProvider
+import com.rezapour.cryptoprices.data.network.mapper.NetworkDataMapper
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetDetail
 
 class AssetRepositoryImpl constructor(
     private val apiProvider: ApiProvider,
-    private val databaseProvider: DataBaseProvider
+    private val dao: AssetDao,
+    private val networkMapper: NetworkDataMapper,
+    private val dbMapper: DataBaseMapper
 ) : AssetRepository {
-    override suspend fun getAssets(): DataState<List<Asset>> {
+    //TODO how to find out is
+    override suspend fun getAssets(): List<Asset> {
         return try {
-            val assets = apiProvider.getAssets()
-            databaseProvider.replaceAll(assets)
-            DataState.Success(databaseProvider.getAllAssets())
+            val assetNetworkEntity = apiProvider.getAssets()
+            replaceAllAssets(networkMapper.assetNetworkEntityListToAssetList(assetNetworkEntity))
+            dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets())
 
-        } catch (e: DataProviderException) {
-            DataState.Error(e.messageId, databaseProvider.getAllAssets())
         } catch (e: Exception) {
-            DataState.DefaultError(databaseProvider.getAllAssets())
+            Log.d("REZAAPP",e.message.toString())
+            dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets())
         }
     }
 
-    override suspend fun insertFavorite(asset: Asset) {
-        databaseProvider.insertFavorite(asset)
+    private suspend fun replaceAllAssets(assets: List<Asset>) {
+        dao.deleteAll()
+        dao.insertAll(dbMapper.assetListToAssetDatabaseEntityList(assets))
     }
 
-    override suspend fun getFavorite(): List<Asset> = databaseProvider.getFavorite()
-
-    override suspend fun deleteFavorite(assetId: String) = databaseProvider.deleteFavorite(assetId)
     override suspend fun searchAsset(assetId: String): List<Asset> {
-        return databaseProvider.searchAsset(assetId)
+        return dbMapper.assetDatabaseEntityListToAssetList(dao.searchAsset(assetId))
     }
 
     override suspend fun getAssetDetail(assetIdBase: String, assetIdQuote: String): AssetDetail {
-        return apiProvider.getAssetDetail(assetIdBase,assetIdQuote)
+        return apiProvider.getAssetDetail(assetIdBase, assetIdQuote)
     }
 }
