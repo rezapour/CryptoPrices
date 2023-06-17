@@ -60,14 +60,14 @@ import kotlinx.coroutines.CoroutineScope
 fun AssetListScreen(
     viewModel: AssetListViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    OnNavigateToDetail: () -> Unit
+    onNavigateToDetail: (String) -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     Scaffold(
         topBar = { TopBar(viewModel) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { padding ->
-        Content(viewModel, snackbarHostState, scope, Modifier.padding(padding))
+        Content(viewModel, snackbarHostState, scope, onNavigateToDetail, Modifier.padding(padding))
     }
 
 }
@@ -78,30 +78,15 @@ fun Content(
     viewModel: AssetListViewModel,
     snackbarHostState: SnackbarHostState,
     coroutineScope: CoroutineScope,
+    onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (val state = viewModel.dataState.collectAsState().value) {
-        is DataState.DefaultError -> {
-            SnackBarItem(
-                snackbarHostState,
-                coroutineScope,
-                stringResource(R.string.error_default_message),
-                stringResource(R.string.retry)
-            ) { viewModel.loadData() }
-
-            AssetList(
-                assetItems = state.data ?: emptyList(),
-                { asset, checkState ->
-                    if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-                }, modifier = modifier
-            )
-        }
-
         is DataState.Error -> {
             SnackBarItem(
                 snackbarHostState,
                 coroutineScope,
-                stringResource(id = state.message),
+                "THere is a problem",
                 stringResource(R.string.retry)
             ) { viewModel.loadData() }
 
@@ -109,7 +94,7 @@ fun Content(
                 assetItems = state.data,
                 { asset, checkState ->
                     if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-                }, modifier = modifier
+                }, onItemClicked = onItemClicked, modifier = modifier
             )
         }
 
@@ -118,8 +103,10 @@ fun Content(
             assetItems = state.data,
             { asset, checkState ->
                 if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-            }, modifier = modifier
+            }, onItemClicked = onItemClicked, modifier = modifier
         )
+
+        is DataState.EmptyList -> TODO()
     }
 }
 
@@ -128,6 +115,7 @@ fun AssetList(
     assetItems: List<AssetItem>,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
     useLocalData: Boolean = true,
+    onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -150,7 +138,7 @@ fun AssetList(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(items = assetItems, key = { assetItem -> assetItem.asset.assetId }) { assetItem ->
-                AssetItemState(assetItem = assetItem, onFavoriteClicked)
+                AssetItemState(assetItem = assetItem, onFavoriteClicked, onItemClicked)
             }
         }
     }
@@ -161,6 +149,7 @@ fun AssetList(
 fun AssetItemState(
     assetItem: AssetItem,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
+    onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var checkState by rememberSaveable { mutableStateOf(assetItem.favorite) }
@@ -168,7 +157,7 @@ fun AssetItemState(
     AssetItem(assetItem.asset, checkState, {
         checkState = !checkState
         onFavoriteClicked(assetItem.asset, checkState)
-    })
+    }, onItemClicked)
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -177,6 +166,7 @@ fun AssetItem(
     asset: Asset,
     checked: Boolean,
     onCheckedChanged: () -> Unit,
+    onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -185,11 +175,13 @@ fun AssetItem(
         color = MaterialTheme.colorScheme.surface
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onItemClicked(asset.assetId) },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             GlideImage(
-                model = Constance.getImageUrl(asset.idIcon?.replace("-","")),
+                model = Constance.getImageUrl(asset.idIcon?.replace("-", "")),
                 contentDescription = "Hello",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -242,7 +234,7 @@ fun TopBar(viewModel: AssetListViewModel) {
             { text -> viewModel.search(text) })
     else
         TopAppBar(title = { Text(text = stringResource(R.string.cryptocurrencies)) }, actions = {
-            TopBarDefault(
+            TopBarDefault(favoriteState,
                 {   //TODO only fetch data
                     favoriteState = !favoriteState
                     if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
@@ -254,6 +246,7 @@ fun TopBar(viewModel: AssetListViewModel) {
 
 @Composable
 fun TopBarDefault(
+    favoriteState:Boolean,
     onFavoriteClicked: () -> Unit,
     onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -264,7 +257,7 @@ fun TopBarDefault(
                 painter = painterResource(id = R.drawable.baseline_favorite_24),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = Color.Gray
+                tint = if (favoriteState) Color.Red else Color.Gray
             )
         }
 

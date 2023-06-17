@@ -32,16 +32,14 @@ class AssetListViewModel @Inject constructor(
         loadData()
     }
 
-    //Todo change dispatcher and find a way for error
     fun loadData() {
         _dataState.value = DataState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            _dataState.value = DataState.Success(
-                mapToAssetItem(
-                    assetRepository.getAssets(),
-                    favoriteRepository.getFavoriteId()
-                )
+            val cacheAble = assetRepository.getAssets()
+            val assetItem = mapToAssetItem(
+                cacheAble.data, favoriteRepository.getFavoriteId()
             )
+            _dataState.value = calculateState(cacheAble.isCached!!, assetItem)
         }
     }
 
@@ -53,30 +51,42 @@ class AssetListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) { favoriteRepository.deleteFavorite(assetId) }
     }
 
-    //Todo emptyList message
     fun getFavorite() {
         _dataState.value = DataState.Loading
         viewModelScope.launch {
-            _dataState.value = DataState.Success(
-                favoriteRepository.getFavorite().map { favorite -> AssetItem(favorite, true) })
+            val assets = favoriteRepository.getFavorite()
+            if (assets.isNotEmpty()) {
+                _dataState.value =
+                    DataState.Success(assets.map { favorite -> AssetItem(favorite, true) })
+            } else _dataState.value = DataState.EmptyList("there is noting to show.")
         }
     }
 
-    //Todo emptyList message
     fun search(assetId: String) {
         _dataState.value = DataState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            _dataState.value = DataState.Success(
-                mapToAssetItem(
-                    assetRepository.searchAsset(assetId),
-                    favoriteRepository.getFavoriteId()
+            val assets = assetRepository.searchAsset(assetId)
+            if (assets.isNotEmpty())
+                _dataState.value = DataState.Success(
+                    mapToAssetItem(
+                        assets,
+                        favoriteRepository.getFavoriteId()
+                    )
                 )
-            )
+            else _dataState.value = DataState.EmptyList("There is nothing to show.")
         }
     }
 
     private fun mapToAssetItem(assets: List<Asset>, favorite: Set<String>): List<AssetItem> =
         assets.map { asset -> AssetItem(asset, asset.assetId in favorite) }
 
-
+    private fun calculateState(cacheAble: Boolean, assetItem: List<AssetItem>) =
+        if (!cacheAble) {
+            DataState.Success(assetItem)
+        } else {
+            if (assetItem.isEmpty())
+                DataState.EmptyList("List Is empty")
+            else
+                DataState.Error(assetItem)
+        }
 }

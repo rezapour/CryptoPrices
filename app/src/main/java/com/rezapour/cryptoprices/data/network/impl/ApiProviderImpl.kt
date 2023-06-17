@@ -3,13 +3,12 @@ package com.rezapour.cryptoprices.data.network.impl
 import com.rezapour.cryptoprices.data.exception.DataProviderException
 import com.rezapour.cryptoprices.data.network.ApiProvider
 import com.rezapour.cryptoprices.data.network.exception.ExceptionMapper
-import com.rezapour.cryptoprices.data.network.mapper.NetworkDataMapper
 import com.rezapour.cryptoprices.data.network.model.AssetNetworkEntity
+import com.rezapour.cryptoprices.data.network.model.ExchangeRateNetworkEntity
 import com.rezapour.cryptoprices.data.network.retrofit.Api
-import com.rezapour.cryptoprices.model.AssetDetail
 import retrofit2.Response
 
-class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMapper) : ApiProvider {
+class ApiProviderImpl(private val api: Api) : ApiProvider {
     //Note:
     override suspend fun getAssets(): List<AssetNetworkEntity> {
         try {
@@ -29,22 +28,41 @@ class ApiProviderImpl(private val api: Api, private val mapper: NetworkDataMappe
     }
 
     override suspend fun getAssetDetail(
-        assetIdBase: String,
-        assetIdQuote: String
-    ): AssetDetail {
+        assetIdBase: String
+    ): AssetNetworkEntity {
         try {
             val assetResponse = api.getAssetDetail(assetIdBase)
-            val assetRate = api.getExchangeRate(assetIdBase, assetIdQuote)
-            if (assetResponse.isSuccessful && assetRate.isSuccessful)
-                if (assetResponse.isResponseValid() && assetRate.isResponseValid())
-                    return mapper.assetDetailNetworkEntityToAssetDetail(
-                        assetResponse.body()!![0],
-                        assetRate.body()!!
-                    )
+            if (assetResponse.isSuccessful)
+                if (assetResponse.isResponseValid())
+                    return assetResponse.body()!![0]
                 else
                     throw DataProviderException(ExceptionMapper.toServerError())
             else
                 throw DataProviderException(ExceptionMapper.toApiCallErrorMessage(assetResponse.code()))
+        } catch (e: Exception) {
+            if (e is DataProviderException)
+                throw e
+            throw DataProviderException(ExceptionMapper.toInternetConnectionError())
+        }
+    }
+
+    override suspend fun getAssetPrice(
+        assetIdBase: String,
+        assetIdQuote: String
+    ): ExchangeRateNetworkEntity {
+        try {
+            val exchangeRateResponse = api.getExchangeRate(assetIdBase, assetIdQuote)
+            if (exchangeRateResponse.isSuccessful)
+                if (exchangeRateResponse.isResponseValid())
+                    return exchangeRateResponse.body()!!
+                else
+                    throw DataProviderException(ExceptionMapper.toServerError())
+            else
+                throw DataProviderException(
+                    ExceptionMapper.toApiCallErrorMessage(
+                        exchangeRateResponse.code()
+                    )
+                )
         } catch (e: Exception) {
             if (e is DataProviderException)
                 throw e

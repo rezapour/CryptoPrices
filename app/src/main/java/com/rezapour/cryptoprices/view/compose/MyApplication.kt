@@ -20,9 +20,17 @@ fun MyApplication(
         modifier = modifier
     ) {
         composable("assetList") {
-            AssetListScreen() { navController.navigate("detail") }
+            AssetListScreen() {assetid-> navController.navigate("detail/$assetid")}
         }
 
-        composable("detail") { AssetDetailScreen() }
+        composable("detail/{assetId}") { backStackEntry ->
+            AssetDetailScreen(
+                assetId = backStackEntry.arguments?.getString(
+                    "assetId"
+                ), backButton = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }

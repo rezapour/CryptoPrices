@@ -15,7 +15,8 @@ import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
-class AssetDetailViewModel @Inject constructor(private val repository: AssetRepository) : ViewModel() {
+class AssetDetailViewModel @Inject constructor(private val repository: AssetRepository) :
+    ViewModel() {
     private val _dataState: MutableStateFlow<DataState<AssetDetail>> = MutableStateFlow(
         DataState.Loading
     )
@@ -26,7 +27,6 @@ class AssetDetailViewModel @Inject constructor(private val repository: AssetRepo
             try {
                 _dataState.value = DataState.Success(repository.getAssetDetail(assetId))
             } catch (e: Exception) {
-                Log.d("REZAPOUR","${e.message}")
                 _dataState.value = DataState.DefaultError(null)
             }
         }

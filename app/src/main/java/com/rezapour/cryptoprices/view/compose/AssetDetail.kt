@@ -37,15 +37,13 @@ import com.rezapour.cryptoprices.view.view_models.AssetDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssetDetailScreen(viewModel: AssetDetailViewModel = hiltViewModel()) {
-    Log.d("REZAPOUR", "Start")
-    viewModel.loadAssetDetail("BTC")
+fun AssetDetailScreen(viewModel: AssetDetailViewModel = hiltViewModel(), assetId: String?,backButton: () -> Unit) {
+    if (assetId != null)
+        viewModel.loadAssetDetail(assetId)
 
-    Scaffold(topBar = { TopBar() }) { paddingValues ->
+    Scaffold(topBar = { TopBar(backButton) }) { paddingValues ->
         Screen(viewModel, Modifier.padding(paddingValues))
     }
-
-
 }
 
 @Composable
@@ -62,16 +60,15 @@ fun Screen(viewModel: AssetDetailViewModel, modifier: Modifier = Modifier) {
         DataState.Loading -> {
             Loading()
         }
-
-        is DataState.Success -> ContentSection(asset = state.data,modifier=modifier)
+        is DataState.Success -> ContentSection(asset = state.data, modifier = modifier)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar() {
+fun TopBar(backButton:()->Unit) {
     TopAppBar(title = { Text(text = stringResource(R.string.detail)) }, navigationIcon = {
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = {backButton()}) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
         }
     })
@@ -91,9 +88,9 @@ fun ContentSection(asset: AssetDetail, modifier: Modifier = Modifier) {
         )
 
         DetailRatePart(
-            time = asset.exchnageTime,
+            time = asset.exchnageTime ?: "",
             rate = asset.rate.toString(),
-            quote = asset.assetIdQuote
+            quote = asset.assetIdQuote ?: ""
         )
     }
 }

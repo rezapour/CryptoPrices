@@ -1,6 +1,5 @@
 package com.rezapour.cryptoprices.data.network.mapper
 
-import com.rezapour.cryptoprices.data.network.model.AssetIconNetWorkEntity
 import com.rezapour.cryptoprices.data.network.model.AssetNetworkEntity
 import com.rezapour.cryptoprices.data.network.model.ExchangeRateNetworkEntity
 import com.rezapour.cryptoprices.model.Asset
@@ -54,8 +53,8 @@ class NetworkDataMapper @Inject constructor() {
                 idIcon = idIcon,
                 dataQuoteStart = dataQuoteStart,
                 dataQuoteEnd = dataQuoteEnd,
-                dataOrderbookStart = dataOrderbookStart,
-                dataOrderbookEnd = dataOrderbookEnd,
+                dataOrderBookStart = dataOrderbookStart,
+                dataOrderBookEnd = dataOrderbookEnd,
                 dataTradeStart = dataTradeStart,
                 dataTradeEnd = dataTradeEnd,
                 dataSymbolsCount = dataSymbolsCount,

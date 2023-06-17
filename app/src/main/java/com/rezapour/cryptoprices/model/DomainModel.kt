@@ -25,8 +25,8 @@ data class AssetDetail(
     var idIcon: String?,
     var dataQuoteStart: String?,
     var dataQuoteEnd: String?,
-    var dataOrderbookStart: String?,
-    var dataOrderbookEnd: String?,
+    var dataOrderBookStart: String?,
+    var dataOrderBookEnd: String?,
     var dataTradeStart: String?,
     var dataTradeEnd: String?,
     var dataSymbolsCount: Int,
@@ -36,11 +36,17 @@ data class AssetDetail(
     var priceUsd: Double,
     var dataStart: String?,
     var dataEnd: String?,
-    var exchnageTime: String,
-    var assetIdQuote: String,
-    var rate: Double
+    var exchangeTime: String?,
+    var assetIdQuote: String?,
+    var rate: Double?
 )
 
 data class AssetItem(var asset: Asset, var favorite: Boolean)
 
-
+data class CacheableResult<T> private constructor(val data: T, val isCached: Boolean?) {
+    companion object {
+        fun <T> initCachedResult(data: T) = CacheableResult(data, true)
+        fun <T> initFreshenResult(data: T) = CacheableResult(data, false)
+        fun <T> init(data: T) = CacheableResult(data, null)
+    }
+}
