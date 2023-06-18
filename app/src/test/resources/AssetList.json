@@ -1,23 +1,5 @@
 [
   {
-    "asset_id": "USD",
-    "name": "US Dollar",
-    "type_is_crypto": 0,
-    "data_quote_start": "2014-02-24T17:43:05.0000000Z",
-    "data_quote_end": "2023-06-08T00:00:00.0000000Z",
-    "data_orderbook_start": "2014-02-24T17:43:05.0000000Z",
-    "data_orderbook_end": "2023-06-08T00:00:00.0000000Z",
-    "data_trade_start": "2010-07-17T23:09:17.0000000Z",
-    "data_trade_end": "2023-06-08T00:00:00.0000000Z",
-    "data_symbols_count": 187129,
-    "volume_1hrs_usd": 13532379959941.70,
-    "volume_1day_usd": 1571120345302048.66,
-    "volume_1mth_usd": 77247677300289171.26,
-    "id_icon": "0a4185f2-1a03-4a7c-b866-ba7076d8c73b",
-    "data_start": "2010-07-17",
-    "data_end": "2023-06-08"
-  },
-  {
     "asset_id": "BTC",
     "name": "Bitcoin",
     "type_is_crypto": 1,

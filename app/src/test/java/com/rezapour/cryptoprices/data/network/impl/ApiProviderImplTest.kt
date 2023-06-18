@@ -39,8 +39,7 @@ class ApiProviderImplTest {
             RetrofitClient().retrofitProvider(mockWebServer.url("/"), 1000)
                 .create(Api::class.java)
         apiProvider = ApiProviderImpl(
-            api,
-            NetworkDataMapper()
+            api
         )
     }
 
@@ -65,7 +64,7 @@ class ApiProviderImplTest {
 
         runTest {
             val response = apiProvider.getAssets()
-            assertThat(response).isEqualTo(SampleDataFactory.getAssets())
+            assertThat(response).isEqualTo(SampleDataFactory.getNetworkEntitySingleItem())
         }
     }
 
@@ -116,7 +115,7 @@ class ApiProviderImplTest {
     }
 
     @Test
-    fun `getCustomers throws internet connection problem when response code is unknown range`() {
+    fun `getAssets throws internet connection problem when response code is unknown range`() {
         val responseTest = MockResponse()
             .setResponseCode(HttpURLConnection.HTTP_MOVED_PERM)
 
@@ -130,4 +129,156 @@ class ApiProviderImplTest {
         assertEquals(R.string.error_internet_connection, messageId)
     }
 
+    //////////////////////////////////////////////////
+    @Test
+    fun `getAssetsDetail response list of Assets when run successfully`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .setBody(responseMapper("AssetList.json"))
+
+        mockWebServer.enqueue(responseTest)
+
+        runTest {
+            val response = apiProvider.getAssetDetail("")
+            assertThat(response).isEqualTo(SampleDataFactory.getNetworkEntity())
+        }
+    }
+
+    @Test
+    fun `getAssetsDetail throws internet connection exception when api call is failed`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetDetail("")
+            }
+        }.messageId
+        assertEquals(R.string.error_internet_connection, messageId)
+    }
+
+    @Test
+    fun `getAssetsDetail throws access denied when response code is 400 range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
+
+        mockWebServer.enqueue(responseTest)
+
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetDetail("")
+            }
+        }.messageId
+        assertEquals(R.string.error_access_denied, messageId)
+    }
+
+    @Test
+    fun `getAssetsDetail throws server error when response code is 500 range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetDetail("")
+            }
+        }.messageId
+        assertEquals(R.string.error_server_error, messageId)
+    }
+
+    @Test
+    fun `getAssetsDetail  throws internet connection problem when response code is unknown range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_MOVED_PERM)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetDetail("")
+            }
+        }.messageId
+        assertEquals(R.string.error_internet_connection, messageId)
+    }
+
+    ////////
+
+    @Test
+    fun `getPrice response list of Assets when run successfully`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .setBody(responseMapper("PriceResponse.json"))
+
+        mockWebServer.enqueue(responseTest)
+
+        runTest {
+            val response = apiProvider.getAssetPrice("","")
+            assertThat(response).isEqualTo(SampleDataFactory.getExchangeRateNetworkEntity())
+        }
+    }
+
+    @Test
+    fun `getPrice throws internet connection exception when api call is failed`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetPrice("","")
+            }
+        }.messageId
+        assertEquals(R.string.error_internet_connection, messageId)
+    }
+
+    @Test
+    fun `getPrice throws access denied when response code is 400 range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST)
+
+        mockWebServer.enqueue(responseTest)
+
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetPrice("","")
+            }
+        }.messageId
+        assertEquals(R.string.error_access_denied, messageId)
+    }
+
+    @Test
+    fun `getPrice throws server error when response code is 500 range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetPrice("","")
+            }
+        }.messageId
+        assertEquals(R.string.error_server_error, messageId)
+    }
+
+    @Test
+    fun `getPrice  throws internet connection problem when response code is unknown range`() {
+        val responseTest = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_MOVED_PERM)
+
+        mockWebServer.enqueue(responseTest)
+
+        val messageId = Assert.assertThrows(DataProviderException::class.java) {
+            runTest {
+                apiProvider.getAssetPrice("","")
+            }
+        }.messageId
+        assertEquals(R.string.error_internet_connection, messageId)
+    }
 }
