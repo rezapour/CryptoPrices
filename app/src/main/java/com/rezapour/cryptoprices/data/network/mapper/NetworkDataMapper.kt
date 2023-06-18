@@ -64,7 +64,7 @@ class NetworkDataMapper @Inject constructor() {
                 priceUsd = priceUsd,
                 dataStart = dataStart,
                 dataEnd = dataEnd,
-                exchnageTime = exchange.time,
+                exchangeTime = exchange.time,
                 assetIdQuote = exchange.assetIdQuote,
                 rate = exchange.rate
             )

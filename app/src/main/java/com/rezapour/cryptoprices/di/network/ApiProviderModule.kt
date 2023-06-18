@@ -17,7 +17,6 @@ object ApiProviderModule {
     @Singleton
     @Provides
     fun provideNetworkDataProvider(
-        apiService: Api,
-        mapper: NetworkDataMapper
-    ): ApiProvider = ApiProviderImpl(apiService, mapper)
+        apiService: Api
+    ): ApiProvider = ApiProviderImpl(apiService)
 }
