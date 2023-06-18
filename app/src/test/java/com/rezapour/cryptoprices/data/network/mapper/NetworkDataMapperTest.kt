@@ -20,4 +20,11 @@ class NetworkDataMapperTest {
             SampleDataFactory.getAssets()
         )
     }
+
+    @Test
+    fun assetNetworkEntitytoAssetDetail(){
+        assertThat(mapper.assetDetailNetworkEntityToAssetDetail(SampleDataFactory.getNetworkEntity(),SampleDataFactory.getExchangeRateNetworkEntity())).isEqualTo(
+            SampleDataFactory.getAssetDetail()
+        )
+    }
 }
