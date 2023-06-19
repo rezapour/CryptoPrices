@@ -1,5 +1,5 @@
 # Crypto app
-This is a an app that get crypto data form https://docs.coinapi.io/ website and show the detail.
+This is a an app that get crypto data form https://docs.coinapi.io/ website and shows the detail.
 this app has two pages. first page is a list of crypto with ability to mark your favorite crypto and search among them.
 the second page is just a simple view of showing the detail of crypto.
 The last stage of the first screen would be save and you can have you last state of the app even if closed the app.
@@ -8,8 +8,8 @@ The architecture of the app is MVVM. with Model layer, viewmodel and view.
 
 # Note
 In the code there are two types of of comments.
-Note: this type is some explanation about the code.
-TODO: this type is suggestions about how we can improve the code.
+* Note: this type is some explanation about the code.
+* TODO: this type is suggestions about how we can improve the code.
 
 # Libraries that used in the project
 * Compose: for the Ui of the Application
