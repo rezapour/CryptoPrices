@@ -35,4 +35,13 @@ object Dependencies {
     const val room_runtime = "androidx.room:room-runtime:${Version.room}"
     const val room_runtime_ktx="androidx.room:room-ktx:${Version.room} "
     const val room_compiler = "androidx.room:room-compiler:${Version.room}"
+    const val room_paging="androidx.room:room-paging:${Version.room}"
+
+    const val glide_compose="com.github.bumptech.glide:compose:${Version.glide_compose}"
+
+    const val navigation_compose="androidx.navigation:navigation-compose:${Version.nav_version}"
+    const val hilt_navigation_compose="androidx.hilt:hilt-navigation-compose:${Version.nav_hilt}"
+
+    const val paging_runtime="androidx.paging:paging-runtime:${Version.paging_runtime}"
+    const val paging_compose="androidx.paging:paging-compose:${Version.paging_compose}"
 }

@@ -14,11 +14,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,55 +34,94 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.R
+import com.rezapour.cryptoprices.data.Constance
 import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.AssetDetail
 import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
 import com.rezapour.cryptoprices.view.view_models.AssetDetailViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssetDetailScreen(viewModel: AssetDetailViewModel = hiltViewModel(), assetId: String?,backButton: () -> Unit) {
+fun AssetDetailScreen(
+    viewModel: AssetDetailViewModel = hiltViewModel(),
+    assetId: String?,
+    backButton: () -> Unit
+) {
     if (assetId != null)
         viewModel.loadAssetDetail(assetId)
 
-    Scaffold(topBar = { TopBar(backButton) }) { paddingValues ->
-        Screen(viewModel, Modifier.padding(paddingValues))
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        topBar = { TopBar(backButton) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { paddingValues ->
+        Screen(
+            viewModel,
+            snackbarHostState,
+            scope,
+            { viewModel.loadAssetDetail(assetId!!) },
+            Modifier.padding(paddingValues)
+        )
     }
 }
 
 @Composable
-fun Screen(viewModel: AssetDetailViewModel, modifier: Modifier = Modifier) {
+fun Screen(
+    viewModel: AssetDetailViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope,
+    retry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     when (val state = viewModel.dataState.collectAsState().value) {
-        is DataState.DefaultError -> {
-            Log.d("REZAPOUR", "error")
-        }
-
         is DataState.Error -> {
-            Log.d("REZAPOUR", "error")
+            ContentSection(
+                asset = state.data, { ErrorLabel() },
+                modifier = modifier
+            )
+
+            SnackBarItem(
+                snackbarHostState,
+                coroutineScope,
+                "THere is a problem",
+                stringResource(R.string.retry)
+            ) { retry() }
         }
 
         DataState.Loading -> {
             Loading()
         }
-        is DataState.Success -> ContentSection(asset = state.data, modifier = modifier)
+
+        is DataState.Success -> ContentSection(
+            asset = state.data,
+            modifier = modifier
+        )
+
+        is DataState.EmptyList -> TODO()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(backButton:()->Unit) {
+fun TopBar(backButton: () -> Unit) {
     TopAppBar(title = { Text(text = stringResource(R.string.detail)) }, navigationIcon = {
-        IconButton(onClick = {backButton()}) {
+        IconButton(onClick = { backButton() }) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
         }
     })
 }
 
 @Composable
-fun ContentSection(asset: AssetDetail, modifier: Modifier = Modifier) {
-    Log.d("REZAPOUR", "ss")
+fun ContentSection(
+    asset: AssetDetail,
+    onError: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier) {
-        DetailFirstPart(imageUrl = "", assetId = asset.assetId, assetName = asset.name)
+        onError()
+        DetailFirstPart(imageUrl = asset.idIcon, assetId = asset.assetId, assetName = asset.name)
         DetailsSecondPart(
             symbol = asset.dataSymbolsCount.toString(),
             horus = asset.volume1hrsUsd.toString(),
@@ -88,7 +131,7 @@ fun ContentSection(asset: AssetDetail, modifier: Modifier = Modifier) {
         )
 
         DetailRatePart(
-            time = asset.exchnageTime ?: "",
+            time = asset.exchangeTime ?: "",
             rate = asset.rate.toString(),
             quote = asset.assetIdQuote ?: ""
         )
@@ -98,7 +141,7 @@ fun ContentSection(asset: AssetDetail, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun DetailFirstPart(
-    imageUrl: String,
+    imageUrl: String?,
     assetId: String,
     assetName: String,
     modifier: Modifier = Modifier
@@ -106,7 +149,7 @@ fun DetailFirstPart(
 
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         GlideImage(
-            model = imageUrl,
+            model = Constance.getImageUrl(imageUrl?.replace("-", "")),
             contentDescription = "Hello",
             contentScale = ContentScale.Crop,
             modifier = Modifier

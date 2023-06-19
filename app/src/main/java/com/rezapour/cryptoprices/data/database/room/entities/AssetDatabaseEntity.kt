@@ -22,7 +22,7 @@ data class AssetDatabaseEntity(
     @ColumnInfo("id_icon") var idIcon: String?,
     @ColumnInfo("data_start") var dataStart: String?,
     @ColumnInfo("data_end") var dataEnd: String?,
-    @ColumnInfo("exchnage_time") var exchnageTime: String? = null,
+    @ColumnInfo("exchnage_time") var exchangeTime: String? = null,
     @ColumnInfo("id_Quote") var assetIdQuote: String? = null,
     @ColumnInfo("rate") var rate: Double? = null
 )

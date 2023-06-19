@@ -43,10 +43,9 @@ data class AssetDetail(
 
 data class AssetItem(var asset: Asset, var favorite: Boolean)
 
-data class CacheableResult<T> private constructor(val data: T, val isCached: Boolean?) {
+data class CacheableResult<T> private constructor(val data: T, val isCached: Boolean) {
     companion object {
         fun <T> initCachedResult(data: T) = CacheableResult(data, true)
         fun <T> initFreshenResult(data: T) = CacheableResult(data, false)
-        fun <T> init(data: T) = CacheableResult(data, null)
     }
 }

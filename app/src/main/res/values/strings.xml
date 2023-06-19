@@ -7,4 +7,5 @@
     <string name="retry">Retry</string>
     <string name="cryptocurrencies">Cryptocurrencies</string>
     <string name="detail">Detail</string>
+    <string name="this_data_is_outdated_please_refresh">This data is outdated please refresh.</string>
 </resources>

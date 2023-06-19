@@ -57,8 +57,17 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.activity:activity-compose:1.5.1'
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
+
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.activity:activity-compose:1.7.2'
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -71,16 +80,17 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
 
     def okhttp_version = "4.9.0"
     //Test
     def truth_version = "1.1.3"
     testImplementation "com.google.truth:truth:$truth_version"
     testImplementation 'app.cash.turbine:turbine:0.7.0'
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
 
     //hilt
     implementation Dependencies.hilt_android
@@ -113,10 +123,17 @@ dependencies {
     //room
     implementation Dependencies.room_runtime
     kapt Dependencies.room_compiler
-    implementation "androidx.room:room-ktx:2.3.0"
-    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
+    implementation Dependencies.room_runtime_ktx
+    implementation Dependencies.room_paging
 
-    def nav_version = "2.5.3"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation Dependencies.glide_compose
+
+    //navigation
+    implementation Dependencies.navigation_compose
+    implementation Dependencies.hilt_navigation_compose
+
+
+    implementation Dependencies.paging_runtime
+    implementation Dependencies.paging_compose
+
 }

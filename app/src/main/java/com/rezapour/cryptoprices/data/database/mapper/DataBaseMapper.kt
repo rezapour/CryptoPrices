@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class DataBaseMapper @Inject constructor() {
 
-    private fun assetDatabaseEntityToAsset(
+     fun assetDatabaseEntityToAsset(
         asset: AssetDatabaseEntity
     ): Asset =
         with(asset) {
@@ -58,7 +58,7 @@ class DataBaseMapper @Inject constructor() {
             dataStart = dataStart,
             dataEnd = dataEnd,
             assetIdQuote = assetIdQuote,
-            exchangeTime = exchnageTime,
+            exchangeTime = exchangeTime,
             rate = rate
         )
     }
@@ -82,7 +82,7 @@ class DataBaseMapper @Inject constructor() {
             dataStart = dataStart,
             dataEnd = dataEnd,
             assetIdQuote = assetIdQuote,
-            exchnageTime = exchangeTime,
+            exchangeTime = exchangeTime,
             rate = rate
         )
     }
@@ -112,7 +112,7 @@ class DataBaseMapper @Inject constructor() {
     fun assetListToAssetDatabaseEntityList(assets: List<Asset>): List<AssetDatabaseEntity> =
         assets.map { asset -> assetToAssetDatabaseEntity(asset) }
 
-    fun favoriteDatabaseEntityToAsset(
+    private fun favoriteDatabaseEntityToAsset(
         asset: FavoriteDataBaseEntity
     ): Asset =
         with(asset) {

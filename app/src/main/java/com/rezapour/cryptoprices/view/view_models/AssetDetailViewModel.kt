@@ -1,6 +1,5 @@
 package com.rezapour.cryptoprices.view.view_models
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rezapour.cryptoprices.data.DataState
@@ -11,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,13 +21,13 @@ class AssetDetailViewModel @Inject constructor(private val repository: AssetRepo
     val dataState: StateFlow<DataState<AssetDetail>> = _dataState
 
     fun loadAssetDetail(assetId: String) {
+        _dataState.value = DataState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                _dataState.value = DataState.Success(repository.getAssetDetail(assetId))
-            } catch (e: Exception) {
-                _dataState.value = DataState.DefaultError(null)
-            }
+            val cacheableResult = repository.getAssetDetail(assetId)
+            if (cacheableResult.isCached)
+                _dataState.value = DataState.Error(cacheableResult.data)
+            else
+                _dataState.value = DataState.Success(cacheableResult.data)
         }
     }
-
 }
