@@ -1,6 +1,10 @@
 package com.rezapour.cryptoprices.view.compose
 
+import android.content.Context
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -54,6 +58,22 @@ fun Loading(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun LoadingInList(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        CircularProgressIndicator()
+    }
+
+}
+
+@Composable
+fun TextMessage(@StringRes message: Int, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = stringResource(id = message), style = MaterialTheme.typography.bodyLarge)
+    }
+
+}
+
+@Composable
 fun ErrorLabel() {
     Surface(color = MaterialTheme.colorScheme.error, modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -62,4 +82,8 @@ fun ErrorLabel() {
             style = MaterialTheme.typography.bodyLarge,
         )
     }
+}
+
+fun ToastMessage(context: Context, @StringRes message: Int) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }

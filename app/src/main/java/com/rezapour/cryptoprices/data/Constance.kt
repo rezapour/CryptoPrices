@@ -9,4 +9,6 @@ object Constance {
     const val DATA_BASE_NAME = "AppDataBase"
     fun getImageUrl(imageId: String?) =
         "https://s3.eu-central-1.amazonaws.com/bbxt-static-icons/type-id/png_64/$imageId.png"
+
+    const val PREFERENCE_NAME="Setting"
 }

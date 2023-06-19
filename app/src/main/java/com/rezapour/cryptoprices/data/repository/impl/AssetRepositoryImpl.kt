@@ -15,50 +15,40 @@ class AssetRepositoryImpl constructor(
     private val networkMapper: NetworkDataMapper,
     private val dbMapper: DataBaseMapper
 ) : AssetRepository {
-    override suspend fun getAssets(): CacheableResult<List<Asset>> = try {
+    override suspend fun getAssets() {
         val assetNetworkEntity = apiProvider.getAssets()
         replaceAllAssets(networkMapper.assetNetworkEntityListToAssetList(assetNetworkEntity))
-        CacheableResult.initFreshenResult(dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets()))
-
-    } catch (e: Exception) {
-        CacheableResult.initCachedResult(dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets()))
     }
-
 
     private suspend fun replaceAllAssets(assets: List<Asset>) {
         dao.deleteAll()
         dao.insertAll(dbMapper.assetListToAssetDatabaseEntityList(assets))
     }
 
-//    override suspend fun getAssets(page: Int): CacheableResult<List<Asset>> {
-//        if (page == 0) {
-//            try {
-//                val assetNetworkEntity = apiProvider.getAssets()
-//                replaceAllAssets(networkMapper.assetNetworkEntityListToAssetList(assetNetworkEntity))
-////            CacheableResult.initFreshenResult(dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets())) page 0
-//            } catch (e: Exception) {
-//                CacheableResult.initCachedResult(dbMapper.assetDatabaseEntityListToAssetList(dao.getAllAssets()))
-//            }
-//        } else {
-//
-//        }
-//
-//    }
-
     override suspend fun searchAsset(assetId: String): List<Asset> {
         return dbMapper.assetDatabaseEntityListToAssetList(dao.searchAsset(assetId))
     }
 
-    override suspend fun getAssetDetail(assetIdBase: String, assetIdQuote: String): AssetDetail {
+    override suspend fun getAssetDetail(
+        assetIdBase: String,
+        assetIdQuote: String
+    ): CacheableResult<AssetDetail> {
         return try {
             val asset = apiProvider.getAssetDetail(assetIdBase)
             val exchangerate = apiProvider.getAssetPrice(assetIdBase, assetIdQuote)
             val assetDetail =
                 networkMapper.assetDetailNetworkEntityToAssetDetail(asset, exchangerate)
             dao.updateAsset(dbMapper.assetDetailToAssetDataBaseEntity(assetDetail))
-            return assetDetail
+            CacheableResult.initFreshenResult(assetDetail)
+
         } catch (e: Exception) {
-            dbMapper.assetDataBaseEntityToAssetDetail(dao.searchAsset(assetIdBase).first())
+            CacheableResult.initCachedResult(
+                dbMapper.assetDataBaseEntityToAssetDetail(
+                    dao.searchAsset(
+                        assetIdBase
+                    ).first()
+                )
+            )
         }
     }
 }

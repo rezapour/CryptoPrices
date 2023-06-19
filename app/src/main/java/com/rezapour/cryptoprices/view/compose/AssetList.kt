@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -35,15 +36,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.R
@@ -52,7 +60,6 @@ import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetItem
 import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
-import kotlinx.coroutines.CoroutineScope
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,86 +71,148 @@ fun AssetListScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    Scaffold(
-        topBar = { TopBar(viewModel) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { padding ->
-        Content(viewModel, snackbarHostState, scope, onNavigateToDetail, Modifier.padding(padding))
-    }
 
+    Scaffold(
+        topBar = {
+            TopBar(
+                viewModel = viewModel,
+                showSearchBar = viewModel.showSearchBar,
+                favoriteState = viewModel.favoriteState,
+                onSearchClicked = { viewModel.updateSearchState(true) },
+                onFavoriteClicked = {
+                    viewModel.updateFavoriteState(!viewModel.favoriteState)
+                },
+                onBackedClicked = {
+                    viewModel.updateSearchState(false)
+                    viewModel.updateFavoriteState(false)
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { padding ->
+        if (viewModel.showSearchBar || viewModel.favoriteState) {
+            Content(
+                viewModel,
+                onNavigateToDetail,
+                Modifier.padding(padding)
+            )
+        } else {
+            PaginationContent(viewModel, onNavigateToDetail, Modifier.padding(padding))
+        }
+    }
+}
+
+@Composable
+fun PaginationContent(
+    viewModel: AssetListViewModel,
+    onItemClicked: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val assetList = viewModel.assetPagingFlow.collectAsLazyPagingItems()
+    AssetList(modifier, onErrorLabel = {
+        if (assetList.loadState.refresh is LoadState.Error) {
+            ErrorLabel()
+        }
+    }, list = {
+        PaginationList(assetList, { asset, checkState ->
+            if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
+        }, onItemClicked)
+    })
 }
 
 //TODO make a cleaner code
 @Composable
 fun Content(
     viewModel: AssetListViewModel,
-    snackbarHostState: SnackbarHostState,
-    coroutineScope: CoroutineScope,
     onItemClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (val state = viewModel.dataState.collectAsState().value) {
         is DataState.Error -> {
-            SnackBarItem(
-                snackbarHostState,
-                coroutineScope,
-                "THere is a problem",
-                stringResource(R.string.retry)
-            ) { viewModel.loadData() }
 
-            AssetList(
-                assetItems = state.data,
-                { asset, checkState ->
-                    if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-                }, onItemClicked = onItemClicked, modifier = modifier
-            )
         }
 
-        DataState.Loading -> Loading(modifier)
-        is DataState.Success -> AssetList(
-            assetItems = state.data,
-            { asset, checkState ->
-                if (checkState) viewModel.addFavorite(asset) else viewModel.deleteFavorite(asset.assetId)
-            }, onItemClicked = onItemClicked, modifier = modifier
-        )
+        DataState.Loading -> LoadingInList(modifier)
+        is DataState.Success -> {
+            val assets = remember { state.data.toMutableStateList() }
+            AssetList(modifier = modifier) {
 
-        is DataState.EmptyList -> TODO()
+                NormalList(
+                    assets,
+                    { asset, checkState ->
+                        if (checkState) viewModel.addFavorite(asset) else {
+                            viewModel.deleteFavorite(asset.assetId)
+                            assets.removeIf { it.asset == asset }
+                        }
+
+                    },
+                    onItemClicked
+                )
+            }
+        }
+
+        is DataState.EmptyList -> TextMessage(message = R.string.empty_list, modifier)
     }
 }
 
 @Composable
 fun AssetList(
-    assetItems: List<AssetItem>,
-    onFavoriteClicked: (Asset, Boolean) -> Unit,
-    useLocalData: Boolean = true,
-    onItemClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onErrorLabel: @Composable () -> Unit = {},
+    list: LazyListScope.() -> Unit
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (useLocalData)
-            Surface(color = MaterialTheme.colorScheme.error, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "This data is outdated please refresh.",
-                    modifier = Modifier.padding(4.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-
-
+        onErrorLabel()
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(items = assetItems, key = { assetItem -> assetItem.asset.assetId }) { assetItem ->
-                AssetItemState(assetItem = assetItem, onFavoriteClicked, onItemClicked)
-            }
+            list()
         }
     }
 
 }
+
+
+fun LazyListScope.NormalList(
+    assetItems: List<AssetItem>,
+    onFavoriteClicked: (Asset, Boolean) -> Unit,
+    onItemClicked: (String) -> Unit,
+) {
+    items(items = assetItems, key = { assetItem -> assetItem.asset.assetId }) { assetItem ->
+        AssetItemState(assetItem = assetItem, onFavoriteClicked, onItemClicked)
+    }
+    if (assetItems.size == 0)
+        item { TextMessage(message = R.string.empty_list) }
+}
+
+
+fun LazyListScope.PaginationList(
+    assetItems: LazyPagingItems<AssetItem>,
+    onFavoriteClicked: (Asset, Boolean) -> Unit,
+    onItemClicked: (String) -> Unit,
+) {
+    items(
+        count = assetItems.itemCount,
+        key = assetItems.itemKey(),
+        contentType = assetItems.itemContentType(
+        )
+    ) { index ->
+        val item = assetItems[index]
+        item?.let { AssetItemState(assetItem = it, onFavoriteClicked, onItemClicked) }
+    }
+
+    item {
+        if (assetItems.loadState.refresh is LoadState.Loading) {
+            LoadingInList()
+        }
+    }
+}
+
 
 @Composable
 fun AssetItemState(
@@ -157,8 +226,9 @@ fun AssetItemState(
     AssetItem(assetItem.asset, checkState, {
         checkState = !checkState
         onFavoriteClicked(assetItem.asset, checkState)
-    }, onItemClicked)
+    }, onItemClicked, modifier)
 }
+
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -219,34 +289,42 @@ fun AssetItem(
 //TODO load data should change to chash not load again
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(viewModel: AssetListViewModel) {
-    var showSearchBar by rememberSaveable { mutableStateOf(false) }
-    var favoriteState by rememberSaveable { mutableStateOf(false) }
+fun TopBar(
+    viewModel: AssetListViewModel,
+    showSearchBar: Boolean = false,
+    favoriteState: Boolean = false,
+    onFavoriteClicked: () -> Unit,
+    onSearchClicked: () -> Unit,
+    onBackedClicked: () -> Unit
+) {
+    val context = LocalContext.current
     var text by rememberSaveable { mutableStateOf("") }
     if (showSearchBar)
         SearchBar(
-            {
-                showSearchBar = false
-                viewModel.loadData()
-            },
+            onBackedClicked,
             text = text,
             { newText -> text = newText },
-            { text -> viewModel.search(text) })
+            { text ->
+                if (text.isNotEmpty()) viewModel.search(text) else ToastMessage(
+                    context,
+                    message = R.string.empty_text
+                )
+            })
     else
         TopAppBar(title = { Text(text = stringResource(R.string.cryptocurrencies)) }, actions = {
-            TopBarDefault(favoriteState,
-                {   //TODO only fetch data
-                    favoriteState = !favoriteState
-                    if (favoriteState) viewModel.getFavorite() else viewModel.loadData()
-                },
-                { showSearchBar = true })
+            if (favoriteState) viewModel.getFavorite()
+            TopBarDefault(
+                favoriteState,
+                onFavoriteClicked,
+                onSearchClicked
+            )
         })
 
 }
 
 @Composable
 fun TopBarDefault(
-    favoriteState:Boolean,
+    favoriteState: Boolean,
     onFavoriteClicked: () -> Unit,
     onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier

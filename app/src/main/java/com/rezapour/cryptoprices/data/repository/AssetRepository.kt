@@ -5,10 +5,9 @@ import com.rezapour.cryptoprices.model.AssetDetail
 import com.rezapour.cryptoprices.model.CacheableResult
 
 interface AssetRepository {
-    suspend fun getAssets(): CacheableResult<List<Asset>>
+    suspend fun getAssets()
 
     suspend fun searchAsset(assetId: String): List<Asset>
 
-    suspend fun getAssetDetail(assetIdBase: String, assetIdQuote: String = "EUR"): AssetDetail
-//    suspend fun getAssets(page: Int): CacheableResult<List<Asset>>
+    suspend fun getAssetDetail(assetIdBase: String, assetIdQuote: String = "EUR"): CacheableResult<AssetDetail>
 }

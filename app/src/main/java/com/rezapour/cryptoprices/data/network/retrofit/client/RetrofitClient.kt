@@ -50,7 +50,7 @@ class RetrofitClient() {
 
     private fun provideInterceptor(): Interceptor {
         return HttpLoggingInterceptor().also {
-            it.level = HttpLoggingInterceptor.Level.BODY
+            it.level = HttpLoggingInterceptor.Level.BASIC
         }
     }
 }
