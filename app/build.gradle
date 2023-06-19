@@ -135,5 +135,4 @@ dependencies {
 
     implementation Dependencies.paging_runtime
     implementation Dependencies.paging_compose
-
 }

@@ -2,6 +2,7 @@ package com.rezapour.cryptoprices.data.repository
 
 import com.rezapour.cryptoprices.model.Asset
 
+
 interface FavoriteRepository {
 
     suspend fun getFavorite(): List<Asset>

@@ -1,6 +1,5 @@
 package com.rezapour.cryptoprices.view.compose
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +40,7 @@ import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
 import com.rezapour.cryptoprices.view.view_models.AssetDetailViewModel
 import kotlinx.coroutines.CoroutineScope
 
+//TODO: The view is very simple.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetDetailScreen(
@@ -85,7 +85,7 @@ fun Screen(
             SnackBarItem(
                 snackbarHostState,
                 coroutineScope,
-                "THere is a problem",
+                stringResource(id = R.string.error_default_message),
                 stringResource(R.string.retry)
             ) { retry() }
         }
@@ -99,7 +99,7 @@ fun Screen(
             modifier = modifier
         )
 
-        is DataState.EmptyList -> TODO()
+        is DataState.EmptyList -> {}
     }
 }
 
@@ -127,14 +127,14 @@ fun ContentSection(
             horus = asset.volume1hrsUsd.toString(),
             day = asset.volume1dayUsd.toString(),
             month = asset.volume1mthUsd.toString(),
-            price = asset.priceUsd.toString()
+            price = "${asset.priceUsd} $"
         )
-
         DetailRatePart(
-            time = asset.exchangeTime ?: "",
-            rate = asset.rate.toString(),
+            time = asset.exchangeTime ?: "no data",
+            rate = if (asset.rate.toString() == "null") "no data" else asset.rate.toString(),
             quote = asset.assetIdQuote ?: ""
         )
+
     }
 }
 

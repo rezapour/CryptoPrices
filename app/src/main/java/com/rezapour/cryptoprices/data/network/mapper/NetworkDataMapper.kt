@@ -32,6 +32,7 @@ class NetworkDataMapper @Inject constructor() {
             )
         }
 
+    //Note: the filter by 1 is for to only get the Crypto responses.
     fun assetNetworkEntityListToAssetList(
         assets: List<AssetNetworkEntity>
     ): List<Asset> =

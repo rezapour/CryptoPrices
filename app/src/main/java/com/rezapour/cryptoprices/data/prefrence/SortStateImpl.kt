@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import javax.inject.Inject
 
+//TODO: instead of shear preferences we can also use room and sortData base on the need.
 class SortStateImpl @Inject constructor(
     private val sharedPreferences: SharedPreferences,
     private val editor: SharedPreferences.Editor
@@ -19,7 +20,6 @@ class SortStateImpl @Inject constructor(
     }
 
     override fun setSearchState(searchState: Boolean) {
-        Log.d("APPREZA","Search")
         editor.putBoolean(SEARCH_STATE, searchState)
         editor.commit()
     }

@@ -60,8 +60,9 @@ import com.rezapour.cryptoprices.data.DataState
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetItem
 import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
+import kotlinx.coroutines.CoroutineScope
 
-
+//TODO: in compose instead of Pass by Value() we can use CompositionLocal or Static CompositionLocal.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetListScreen(
@@ -96,7 +97,13 @@ fun AssetListScreen(
                 Modifier.padding(padding)
             )
         } else {
-            PaginationContent(viewModel, onNavigateToDetail, Modifier.padding(padding))
+            PaginationContent(
+                viewModel,
+                onNavigateToDetail,
+                snackbarHostState,
+                scope,
+                Modifier.padding(padding)
+            )
         }
     }
 }
@@ -105,12 +112,20 @@ fun AssetListScreen(
 fun PaginationContent(
     viewModel: AssetListViewModel,
     onItemClicked: (String) -> Unit,
+    snackBarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier
 ) {
     val assetList = viewModel.assetPagingFlow.collectAsLazyPagingItems()
     AssetList(modifier, onErrorLabel = {
         if (assetList.loadState.refresh is LoadState.Error) {
             ErrorLabel()
+            SnackBarItem(
+                snackBarHostState,
+                coroutineScope,
+                stringResource(id = R.string.error_default_message),
+                stringResource(R.string.retry)
+            ) { assetList.retry() }
         }
     }, list = {
         PaginationList(assetList, { asset, checkState ->
@@ -119,7 +134,6 @@ fun PaginationContent(
     })
 }
 
-//TODO make a cleaner code
 @Composable
 fun Content(
     viewModel: AssetListViewModel,

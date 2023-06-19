@@ -2,6 +2,7 @@ package com.rezapour.cryptoprices.data.network.exception
 
 import com.rezapour.cryptoprices.R
 
+//Note: All of the api call responses will be map to corresponding message.
 object ExceptionMapper {
     fun toApiCallErrorMessage(responseCode: Int) =
         when (responseCode) {
