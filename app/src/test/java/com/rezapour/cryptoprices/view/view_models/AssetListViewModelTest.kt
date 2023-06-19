@@ -2,7 +2,6 @@ package com.rezapour.cryptoprices.view.view_models
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingSource
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.rezapour.cryptoprices.data.DataState
@@ -14,11 +13,9 @@ import com.rezapour.cryptoprices.data.network.util.MainCoroutineRule
 import com.rezapour.cryptoprices.data.prefrence.SortState
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.data.repository.FavoriteRepository
-import com.rezapour.cryptoprices.model.AssetItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
