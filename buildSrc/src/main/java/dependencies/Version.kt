@@ -15,4 +15,9 @@ object Version {
     const val nav_hilt="1.0.0"
     const val paging_runtime="3.1.1"
     const val paging_compose="3.2.0-beta01"
+    const val junit="4.13.2"
+    const val truth_version = "1.1.3"
+    const val turbine="0.7.0"
+    const val coroutin_test="1.6.1"
+    const val mockito_kotlin="3.2.0"
 }

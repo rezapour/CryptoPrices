@@ -21,7 +21,7 @@ In the code there are two types of of comments.
 * Coroutine: used int for thread handle. it is easy to understand and use instead of rxjava or  
   other ways.
 * Navigation Component: for designing single activity app and also navigation of application and  
-  pass parameters between fragments.
+  pass parameters screens.
 * architecture components
     * ViewModel
     * Lifecycle
