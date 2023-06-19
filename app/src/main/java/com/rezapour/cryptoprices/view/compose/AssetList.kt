@@ -62,7 +62,7 @@ import com.rezapour.cryptoprices.model.AssetItem
 import com.rezapour.cryptoprices.view.view_models.AssetListViewModel
 import kotlinx.coroutines.CoroutineScope
 
-//TODO: in compose instead of Pass by Value() we can use CompositionLocal or Static CompositionLocal.
+//TODO: in compose instead of Pass by Value we can use CompositionLocal or Static CompositionLocal.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetListScreen(
@@ -300,7 +300,6 @@ fun AssetItem(
     }
 }
 
-//TODO load data should change to chash not load again
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
