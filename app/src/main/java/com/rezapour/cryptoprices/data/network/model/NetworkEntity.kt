@@ -23,11 +23,6 @@ data class AssetNetworkEntity(
     @Expose @SerializedName("data_end") var dataEnd: String?
 )
 
-data class AssetIconNetWorkEntity(
-    @Expose @SerializedName("asset_id") var assetId: String,
-    @Expose @SerializedName("url") var url: String,
-)
-
 data class ExchangeRateNetworkEntity(
     @Expose @SerializedName("time") var time: String,
     @Expose @SerializedName("asset_id_base") var assetIdBase: String,
