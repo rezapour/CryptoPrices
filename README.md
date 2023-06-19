@@ -29,3 +29,4 @@ TODO: this type is suggestions about how we can improve the code.
 * Truth: for unit test assertion
 * Junit: and Mockito for unit testing
 * Glide: for lazy loading the Images.
+* CI: github actions
