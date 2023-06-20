@@ -119,7 +119,8 @@ fun PaginationContent(
     val assetList = viewModel.assetPagingFlow.collectAsLazyPagingItems()
     AssetList(modifier, onErrorLabel = {
         if (assetList.loadState.refresh is LoadState.Error) {
-            ErrorLabel()
+            if (assetList.itemCount != 0)
+                ErrorLabel()
             SnackBarItem(
                 snackBarHostState,
                 coroutineScope,
