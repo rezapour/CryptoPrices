@@ -13,12 +13,10 @@ In the code there are two types of of comments.
 * TODO: this type is suggestions about how we can improve the code.
 
 # How to run the app
-the project config is 
-* Gradle 8
-* JVM 17
+the project config is Gradle 8 JVM 17.
 So make sure that you have both of them on your machine the simply you can run the project from the android studio 
 or if you do not access to android studio you can simply go to the root of the project with terminal and run this command
-* gradlew assembleDebug
+"gradlew assembleDebug"
 you going to find the apk in CryptoPrices/app/build/outputs/apk/
 
 # Libraries that used in the project
