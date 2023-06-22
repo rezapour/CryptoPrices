@@ -1,4 +1,4 @@
-package com.rezapour.cryptoprices.data
+package com.rezapour.cryptoprices.util
 
 sealed class DataState<out T> {
     data class Success<T>(val data: T) : DataState<T>()

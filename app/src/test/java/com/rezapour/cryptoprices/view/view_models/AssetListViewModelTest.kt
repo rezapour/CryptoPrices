@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.rezapour.cryptoprices.data.DataState
+import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.data.SampleDataFactory
 import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.dao.AssetDao

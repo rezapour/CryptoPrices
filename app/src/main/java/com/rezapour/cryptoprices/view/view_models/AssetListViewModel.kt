@@ -9,7 +9,7 @@ import androidx.paging.Pager
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.rezapour.cryptoprices.R
-import com.rezapour.cryptoprices.data.DataState
+import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.entities.AssetDatabaseEntity
 import com.rezapour.cryptoprices.data.prefrence.SortState

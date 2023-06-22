@@ -34,7 +34,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.R
 import com.rezapour.cryptoprices.data.Constance
-import com.rezapour.cryptoprices.data.DataState
+import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.model.AssetDetail
 import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
 import com.rezapour.cryptoprices.view.view_models.AssetDetailViewModel

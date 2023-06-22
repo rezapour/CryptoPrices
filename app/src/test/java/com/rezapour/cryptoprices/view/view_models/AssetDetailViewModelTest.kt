@@ -2,7 +2,7 @@ package com.rezapour.cryptoprices.view.view_models
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.rezapour.cryptoprices.data.DataState
+import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.data.SampleDataFactory
 import com.rezapour.cryptoprices.data.network.util.MainCoroutineRule
 import com.rezapour.cryptoprices.data.repository.AssetRepository

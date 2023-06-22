@@ -2,7 +2,7 @@ package com.rezapour.cryptoprices.view.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rezapour.cryptoprices.data.DataState
+import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.model.AssetDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
