@@ -44,4 +44,6 @@ object Dependencies {
 
     const val paging_runtime="androidx.paging:paging-runtime:${Version.paging_runtime}"
     const val paging_compose="androidx.paging:paging-compose:${Version.paging_compose}"
+
+    const val viewmodel_compose="androidx.lifecycle:lifecycle-viewmodel-compose:${Version.viewmodel_compose}"
 }
