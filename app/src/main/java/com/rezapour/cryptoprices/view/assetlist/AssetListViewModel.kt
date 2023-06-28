@@ -53,7 +53,12 @@ class AssetListViewModel @Inject constructor(
     val uiState: StateFlow<UiState<List<AssetItem>>> = _uiState
 
     init {
-        loadData()
+        if (showSearchBar)
+            cleanList()
+        else if (favoriteState)
+            getFavorite()
+        else
+            loadData()
     }
 
     fun cleanList() {

@@ -38,7 +38,6 @@ fun AssetListScreen(
     onNavigateToDetail: (String) -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    var makeListClear by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopBar(
@@ -48,11 +47,14 @@ fun AssetListScreen(
                 favoriteState = viewModel.favoriteState,
                 onSearchClicked = {
                     viewModel.updateSearchState(true)
-
+                    viewModel.cleanList()
+                    if (viewModel.favoriteState) viewModel.updateFavoriteState(!viewModel.favoriteState)
                 },
                 onFavoriteClicked = {
                     if (viewModel.favoriteState) {
                         viewModel.loadData()
+                    } else {
+                        viewModel.getFavorite()
                     }
                     viewModel.updateFavoriteState(!viewModel.favoriteState)
                 },
@@ -71,8 +73,7 @@ fun AssetListScreen(
                 if (checked) viewModel.addFavorite(asset) else
                     viewModel.deleteFavorite(asset.assetId)
             },
-            modifier = modifier.padding(padding),
-            messageScreen = makeListClear
+            modifier = modifier.padding(padding)
         )
     }
 }
@@ -84,39 +85,35 @@ fun Content(
     viewModel: AssetListViewModel,
     onItemClicked: (String) -> Unit,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
-    messageScreen: Boolean
 ) {
-    if (messageScreen) {
-        TextMessage(message = R.string.empty_list, modifier)
-    } else
-        when (uiState) {
-            is UiState.Error -> {
-                ContentItemState(
-                    modifier = modifier,
-                    assetItems = uiState.data,
-                    showError = true,
-                    topFavoriteState = viewModel.favoriteState,
-                    onFavoriteItemClicked = onFavoriteClicked,
-                    onItemClicked = onItemClicked,
-                    onErrorLabelClicked = { viewModel.loadData() }
-                )
-            }
-
-            UiState.Loading -> {
-                Loading()
-            }
-
-            is UiState.Success -> {
-                ContentItemState(
-                    modifier = modifier,
-                    assetItems = uiState.data,
-                    showError = false,
-                    topFavoriteState = viewModel.favoriteState,
-                    onFavoriteItemClicked = onFavoriteClicked,
-                    onItemClicked = onItemClicked
-                )
-            }
+    when (uiState) {
+        is UiState.Error -> {
+            ContentItemState(
+                modifier = modifier,
+                assetItems = uiState.data,
+                showError = true,
+                topFavoriteState = viewModel.favoriteState,
+                onFavoriteItemClicked = onFavoriteClicked,
+                onItemClicked = onItemClicked,
+                onErrorLabelClicked = { viewModel.loadData() }
+            )
         }
+
+        UiState.Loading -> {
+            Loading()
+        }
+
+        is UiState.Success -> {
+            ContentItemState(
+                modifier = modifier,
+                assetItems = uiState.data,
+                showError = false,
+                topFavoriteState = viewModel.favoriteState,
+                onFavoriteItemClicked = onFavoriteClicked,
+                onItemClicked = onItemClicked
+            )
+        }
+    }
 }
 
 @Composable
@@ -138,7 +135,7 @@ fun ContentItemState(
         showError = showError,
         onFavoriteClicked = { asset, checked ->
             onFavoriteItemClicked(asset, checked)
-            if (topFavoriteState)
+            if (topFavoriteState && !checked)
                 assetItemState.removeIf { assetItem -> assetItem.asset.assetId == asset.assetId }
         },
         onItemClicked = onItemClicked,
@@ -155,22 +152,23 @@ fun ContentItem(
     onItemClicked: (String) -> Unit,
     onErrorLabelClicked: () -> Unit = {}
 ) {
-    if (assetItems.isNotEmpty())
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (showError)
-                ErrorLabel(onlClick = onErrorLabelClicked)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (showError)
+            ErrorLabel(onlClick = onErrorLabelClicked)
+        if (assetItems.isNotEmpty())
             AssetList(
                 assetItems = assetItems,
                 onFavoriteClicked = onFavoriteClicked,
                 onItemClicked = onItemClicked
             )
-        }
-    else
-        TextMessage(message = R.string.empty_list, modifier)
+        else
+            TextMessage(message = R.string.empty_list)
+    }
+
 }
 
 @Composable

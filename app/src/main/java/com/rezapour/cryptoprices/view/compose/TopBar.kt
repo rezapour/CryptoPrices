@@ -70,7 +70,6 @@ fun TopBar(
         TopAppBar(
             title = { Text(text = stringResource(R.string.cryptocurrencies)) },
             actions = {
-                if (favoriteState) viewModel.getFavorite()
                 TopBarDefault(
                     favoriteState,
                     enableState,
