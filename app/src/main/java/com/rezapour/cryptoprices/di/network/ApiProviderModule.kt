@@ -2,7 +2,6 @@ package com.rezapour.cryptoprices.di.network
 
 import com.rezapour.cryptoprices.data.network.ApiProvider
 import com.rezapour.cryptoprices.data.network.impl.ApiProviderImpl
-import com.rezapour.cryptoprices.data.network.mapper.NetworkDataMapper
 import com.rezapour.cryptoprices.data.network.retrofit.Api
 import dagger.Module
 import dagger.Provides

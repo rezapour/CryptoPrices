@@ -25,7 +25,7 @@ class RepositoryModule {
         apiProvider: ApiProvider,
         assetDao: AssetDao,
         networkDataMapper: NetworkDataMapper,
-        databaseMapper: DataBaseMapper
+        databaseMapper: DataBaseMapper,
     ): AssetRepository =
         AssetRepositoryImpl(
             apiProvider,

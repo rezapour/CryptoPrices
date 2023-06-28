@@ -6,6 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rezapour.cryptoprices.view.assetdetail.AssetDetailScreen
+import com.rezapour.cryptoprices.view.assetlist.AssetListScreen
 
 @Composable
 fun MyApplication(

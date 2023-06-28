@@ -23,7 +23,6 @@ class prefrenceModule {
         return context.getSharedPreferences(Constance.PREFERENCE_NAME, MODE_PRIVATE)
     }
 
-
     @Singleton
     @Provides
     fun editorProvider(sharedPreferences: SharedPreferences): SharedPreferences.Editor {

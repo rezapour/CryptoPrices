@@ -1,7 +1,6 @@
 package com.rezapour.cryptoprices.data.prefrence
 
 import android.content.SharedPreferences
-import android.util.Log
 import javax.inject.Inject
 
 //TODO: instead of shear preferences we can also use room and sortData base on the need.

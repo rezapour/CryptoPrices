@@ -1,6 +1,5 @@
 package com.rezapour.cryptoprices.data.database.room.dao
 
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -12,7 +11,7 @@ interface AssetDao {
     @Insert
     suspend fun insertAll(assets: List<AssetDatabaseEntity>)
 
-    @Query("SELECT * FROM asset")
+    @Query("SELECT  * FROM ASSET")
     fun getAllAssets(): List<AssetDatabaseEntity>
 
     @Query("DELETE FROM asset")
@@ -23,7 +22,4 @@ interface AssetDao {
 
     @Update
     fun updateAsset(asset: AssetDatabaseEntity)
-
-    @Query("SELECT * FROM asset")
-    fun getAllAssetsTest(): PagingSource<Int, AssetDatabaseEntity>
 }

@@ -17,7 +17,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import com.google.common.truth.Truth.assertThat
 import com.rezapour.cryptoprices.data.exception.DataProviderException
-import com.rezapour.cryptoprices.model.CacheableResult
+import com.rezapour.cryptoprices.util.DataState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,6 +39,27 @@ class AssetRepositoryImplTest {
 
 
     @Test
+    fun getAssetFreshData() = runTest() {
+        whenever(apiProvider.getAssets()).thenReturn(listOf(SampleDataFactory.getNetworkEntity()))
+        whenever(dao.getAllAssets()).thenReturn(listOf(SampleDataFactory.getDataBaseEntityWithNullObjects()))
+
+
+        assertThat(repository.getAssets()).isInstanceOf(DataState.FreshResult::class.java)
+        assertThat(repository.getAssets()).isEqualTo(DataState.FreshResult(listOf(SampleDataFactory.getAsset())))
+    }
+
+    @Test
+    fun getAssetCashData() = runTest() {
+        whenever(apiProvider.getAssets()).thenThrow(DataProviderException(1))
+        whenever(dao.getAllAssets()).thenReturn(listOf(SampleDataFactory.getDataBaseEntityWithNullObjects()))
+
+
+        assertThat(repository.getAssets()).isInstanceOf(DataState.CacheResult::class.java)
+        assertThat(repository.getAssets()).isEqualTo(DataState.CacheResult(listOf(SampleDataFactory.getAsset())))
+    }
+
+
+    @Test
     fun searchAsset() = runTest {
         whenever(dao.searchAsset(any())).thenReturn(listOf(SampleDataFactory.getDataBaseEntity()))
 
@@ -55,8 +76,14 @@ class AssetRepositoryImplTest {
             )
         ).thenReturn(SampleDataFactory.getExchangeRateNetworkEntity())
 
+        assertThat(
+            repository.getAssetDetail(
+                "",
+                ""
+            )
+        ).isInstanceOf(DataState.FreshResult::class.java)
         assertThat(repository.getAssetDetail("", "")).isEqualTo(
-            CacheableResult.initFreshenResult(
+            DataState.FreshResult(
                 SampleDataFactory.getAssetDetail()
             )
         )
@@ -66,8 +93,15 @@ class AssetRepositoryImplTest {
     fun getAssetDetailCachedDataAssetDetailFailed() = runTest {
         whenever(dao.searchAsset(any())).thenReturn(listOf(SampleDataFactory.getDataBaseEntity()))
         whenever(apiProvider.getAssetDetail(any())).thenThrow(DataProviderException(1))
-        assertThat(repository.getAssetDetail("")).isEqualTo(
-            CacheableResult.initCachedResult(
+
+        assertThat(
+            repository.getAssetDetail(
+                "",
+                ""
+            )
+        ).isInstanceOf(DataState.CacheResult::class.java)
+        assertThat(repository.getAssetDetail("", "")).isEqualTo(
+            DataState.CacheResult(
                 SampleDataFactory.getAssetDetail()
             )
         )
@@ -77,8 +111,15 @@ class AssetRepositoryImplTest {
     fun getAssetDetailCachedDataRateFailed() = runTest {
         whenever(dao.searchAsset(any())).thenReturn(listOf(SampleDataFactory.getDataBaseEntity()))
         whenever(apiProvider.getAssetPrice(any(), any())).thenThrow(DataProviderException(1))
-        assertThat(repository.getAssetDetail("")).isEqualTo(
-            CacheableResult.initCachedResult(
+
+        assertThat(
+            repository.getAssetDetail(
+                "",
+                ""
+            )
+        ).isInstanceOf(DataState.CacheResult::class.java)
+        assertThat(repository.getAssetDetail("", "")).isEqualTo(
+            DataState.CacheResult(
                 SampleDataFactory.getAssetDetail()
             )
         )
