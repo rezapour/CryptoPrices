@@ -1,27 +1,22 @@
-package com.rezapour.cryptoprices.view.view_models
+package com.rezapour.cryptoprices.view.assetlist
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.cachedIn
-import androidx.paging.map
 import com.rezapour.cryptoprices.R
-import com.rezapour.cryptoprices.util.DataState
-import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
-import com.rezapour.cryptoprices.data.database.room.entities.AssetDatabaseEntity
+import com.rezapour.cryptoprices.util.UiState
 import com.rezapour.cryptoprices.data.prefrence.SortState
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.data.repository.FavoriteRepository
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetItem
+import com.rezapour.cryptoprices.util.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,9 +24,7 @@ import javax.inject.Inject
 class AssetListViewModel @Inject constructor(
     private val assetRepository: AssetRepository,
     private val favoriteRepository: FavoriteRepository,
-    private val mapper: DataBaseMapper,
-    private val sortState: SortState,
-    page: Pager<Int, AssetDatabaseEntity>
+    private val sortState: SortState
 ) :
     ViewModel() {
 
@@ -47,7 +40,6 @@ class AssetListViewModel @Inject constructor(
     fun updateSearchState(boolean: Boolean) {
         showSearchBar = boolean
         sortState.setSearchState(showSearchBar)
-
     }
 
     fun updateFavoriteState(boolean: Boolean) {
@@ -55,24 +47,39 @@ class AssetListViewModel @Inject constructor(
         sortState.setFavoriteState(favoriteState)
     }
 
-    private val _dataState: MutableStateFlow<DataState<List<AssetItem>>> = MutableStateFlow(
-        DataState.Success(
-            emptyList()
-        )
+    private val _uiState: MutableStateFlow<UiState<List<AssetItem>>> = MutableStateFlow(
+        UiState.Loading
     )
-    val dataState: StateFlow<DataState<List<AssetItem>>> = _dataState
+    val uiState: StateFlow<UiState<List<AssetItem>>> = _uiState
 
-    val assetPagingFlow = page
-        .flow
-        .map { pagingData ->
-            pagingData.map { asset ->
-                AssetItem(
-                    mapper.assetDatabaseEntityToAsset(asset),
-                    asset.assetId in favoriteRepository.getFavoriteId()
-                )
+    init {
+        loadData()
+    }
+
+    fun loadData() {
+        _uiState.value = UiState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val dataState = assetRepository.getAssets()) {
+                is DataState.CacheResult -> {
+                    _uiState.value = UiState.Error(
+                        mapToAssetItem(
+                            dataState.data,
+                            favoriteRepository.getFavoriteId()
+                        )
+                    )
+                }
+
+                is DataState.FreshResult -> {
+                    _uiState.value = UiState.Success(
+                        mapToAssetItem(
+                            dataState.data,
+                            favoriteRepository.getFavoriteId()
+                        )
+                    )
+                }
             }
         }
-        .cachedIn(viewModelScope)
+    }
 
     fun addFavorite(asset: Asset) {
         viewModelScope.launch(Dispatchers.IO) { favoriteRepository.addFavorite(asset) }
@@ -83,32 +90,23 @@ class AssetListViewModel @Inject constructor(
     }
 
     fun getFavorite() {
-        _dataState.value = DataState.Loading
+        _uiState.value = UiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             val assets = favoriteRepository.getFavorite()
-            if (assets.isNotEmpty()) {
-                _dataState.value =
-                    DataState.Success(assets.map { favorite -> AssetItem(favorite, true) })
-            } else _dataState.value = DataState.EmptyList(R.string.empty_list)
+            _uiState.value = UiState.Success(assets.map { favorite -> AssetItem(favorite, true) })
+
         }
     }
 
     fun search(assetId: String) {
-        _dataState.value = DataState.Loading
+        _uiState.value = UiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             val assets = assetRepository.searchAsset(assetId)
-            if (assets.isNotEmpty())
-                _dataState.value = DataState.Success(
-                    mapToAssetItem(
-                        assets,
-                        favoriteRepository.getFavoriteId()
-                    )
-                )
-            else _dataState.value = DataState.EmptyList(R.string.empty_list)
+            _uiState.value =
+                UiState.Success(mapToAssetItem(assets, favoriteRepository.getFavoriteId()))
         }
     }
 
     private fun mapToAssetItem(assets: List<Asset>, favorite: Set<String>): List<AssetItem> =
         assets.map { asset -> AssetItem(asset, asset.assetId in favorite) }
-
 }

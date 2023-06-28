@@ -7,7 +7,7 @@
     <string name="retry">Retry</string>
     <string name="cryptocurrencies">Cryptocurrencies</string>
     <string name="detail">Detail</string>
-    <string name="this_data_is_outdated_please_refresh">This data is outdated please refresh.</string>
+    <string name="this_data_is_outdated_please_refresh">This data is outdated. Click here to refresh.</string>
     <string name="empty_list"> There is no asset to show</string>
     <string name="empty_text">Please type something</string>
     <string name="there_is_noting_to_show">there is noting to show.</string>

@@ -4,7 +4,10 @@ import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.dao.FavoriteDao
 import com.rezapour.cryptoprices.data.repository.FavoriteRepository
 import com.rezapour.cryptoprices.model.Asset
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+
 /*TODO: For improvement we can have a favorite use-case for putting all the logic regarding the favorite
         like putting limitation for favorite and etc.
  */
@@ -27,5 +30,4 @@ class FavoriteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getFavoriteId(): Set<String> = favoriteDao.getFavoriteAssetIds().toSet()
-
 }

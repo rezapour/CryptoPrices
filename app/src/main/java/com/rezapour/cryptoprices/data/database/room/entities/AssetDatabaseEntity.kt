@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "asset")
 data class AssetDatabaseEntity(
-    @PrimaryKey @ColumnInfo("asset_id") var assetId: String,
+    @PrimaryKey() @ColumnInfo("asset_id") var assetId: String,
     @ColumnInfo("name") var name: String,
     @ColumnInfo("data_quote_start") var dataQuoteStart: String?,
     @ColumnInfo("data_quote_end") var dataQuoteEnd: String?,

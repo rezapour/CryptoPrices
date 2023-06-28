@@ -1,6 +1,7 @@
 package com.rezapour.cryptoprices.data.repository
 
 import com.rezapour.cryptoprices.model.Asset
+import kotlinx.coroutines.flow.Flow
 
 
 interface FavoriteRepository {

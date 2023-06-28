@@ -1,5 +1,6 @@
 package com.rezapour.cryptoprices.data.repository.impl
 
+import androidx.paging.ExperimentalPagingApi
 import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.dao.AssetDao
 import com.rezapour.cryptoprices.data.network.ApiProvider
@@ -7,7 +8,7 @@ import com.rezapour.cryptoprices.data.network.mapper.NetworkDataMapper
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetDetail
-import com.rezapour.cryptoprices.model.CacheableResult
+import com.rezapour.cryptoprices.util.DataState
 
 class AssetRepositoryImpl constructor(
     private val apiProvider: ApiProvider,
@@ -15,10 +16,22 @@ class AssetRepositoryImpl constructor(
     private val networkMapper: NetworkDataMapper,
     private val dbMapper: DataBaseMapper
 ) : AssetRepository {
-    override suspend fun getAssets() {
+    override suspend fun getAssets(): DataState<List<Asset>> = try {
         val assetNetworkEntity = apiProvider.getAssets()
         replaceAllAssets(networkMapper.assetNetworkEntityListToAssetList(assetNetworkEntity))
+        DataState.FreshResult(
+            dbMapper.assetDatabaseEntityListToAssetList(
+                dao.getAllAssets()
+            )
+        )
+    } catch (e: Exception) {
+        DataState.CacheResult(
+            dbMapper.assetDatabaseEntityListToAssetList(
+                dao.getAllAssets()
+            )
+        )
     }
+
 
     private suspend fun replaceAllAssets(assets: List<Asset>) {
         dao.deleteAll()
@@ -32,17 +45,17 @@ class AssetRepositoryImpl constructor(
     override suspend fun getAssetDetail(
         assetIdBase: String,
         assetIdQuote: String
-    ): CacheableResult<AssetDetail> {
+    ): DataState<AssetDetail> {
         return try {
             val asset = apiProvider.getAssetDetail(assetIdBase)
             val exchangerate = apiProvider.getAssetPrice(assetIdBase, assetIdQuote)
             val assetDetail =
                 networkMapper.assetDetailNetworkEntityToAssetDetail(asset, exchangerate)
             dao.updateAsset(dbMapper.assetDetailToAssetDataBaseEntity(assetDetail))
-            CacheableResult.initFreshenResult(assetDetail)
+            DataState.FreshResult(assetDetail)
 
         } catch (e: Exception) {
-            CacheableResult.initCachedResult(
+            DataState.CacheResult(
                 dbMapper.assetDataBaseEntityToAssetDetail(
                     dao.searchAsset(
                         assetIdBase

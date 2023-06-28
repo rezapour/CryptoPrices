@@ -1,10 +1,10 @@
-package com.rezapour.cryptoprices.view.view_models
+package com.rezapour.cryptoprices.view.viewmodels
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.rezapour.cryptoprices.util.DataState
+import com.rezapour.cryptoprices.util.UiState
 import com.rezapour.cryptoprices.data.SampleDataFactory
 import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.dao.AssetDao
@@ -13,6 +13,8 @@ import com.rezapour.cryptoprices.data.network.util.MainCoroutineRule
 import com.rezapour.cryptoprices.data.prefrence.SortState
 import com.rezapour.cryptoprices.data.repository.AssetRepository
 import com.rezapour.cryptoprices.data.repository.FavoriteRepository
+import com.rezapour.cryptoprices.util.DataState
+import com.rezapour.cryptoprices.view.assetlist.AssetListViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -31,7 +33,6 @@ class AssetListViewModelTest {
     lateinit var assetRepository: AssetRepository
     lateinit var sortState: SortState
     lateinit var dao: AssetDao
-    lateinit var pager: Pager<Int, AssetDatabaseEntity>
 
     @Before
     fun before() {
@@ -39,41 +40,43 @@ class AssetListViewModelTest {
         assetRepository = mock()
         sortState = mock()
         dao = mock()
-        pager = Pager(
-            config = PagingConfig(pageSize = 20),
-            pagingSourceFactory = {
-                dao.getAllAssetsTest()
-            }
-        )
+
         viewModel = AssetListViewModel(
             assetRepository,
             favoriteRepository,
-            DataBaseMapper(),
             sortState,
-            pager
         )
     }
+
+    @Test
+    fun LoadDataTestSucess()= runTest{
+        whenever(assetRepository.getAssets()).thenReturn(DataState.FreshResult(listOf(SampleDataFactory.getAsset())))
+        whenever(favoriteRepository.getFavoriteId()).thenReturn(setOf("BTC"))
+        viewModel.loadData()
+        viewModel.uiState.test {
+            assertThat(awaitItem()).isInstanceOf(UiState.Success::class.java)
+        }
+    }
+
+    @Test
+    fun LoadDataTestError()= runTest{
+        whenever(assetRepository.getAssets()).thenReturn(DataState.CacheResult(listOf(SampleDataFactory.getAsset())))
+        whenever(favoriteRepository.getFavoriteId()).thenReturn(setOf("BTC"))
+        viewModel.loadData()
+        viewModel.uiState.test {
+            assertThat(awaitItem()).isInstanceOf(UiState.Error::class.java)
+        }
+    }
+
 
     @Test
     fun searchAssetSuccess() = runTest {
         whenever(assetRepository.searchAsset(any())).thenReturn(listOf(SampleDataFactory.getAssetForDataBaseTest()))
         whenever(favoriteRepository.getFavoriteId()).thenReturn(setOf("BTC"))
         viewModel.search("")
-        viewModel.dataState.test {
-            assertThat(awaitItem()).isInstanceOf(DataState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(DataState.Success::class.java)
-        }
-    }
-
-    @Test
-    fun searchAssetEmptyList() = runTest {
-        whenever(assetRepository.searchAsset(any())).thenReturn(emptyList())
-        whenever(favoriteRepository.getFavoriteId()).thenReturn(setOf("BTC"))
-        viewModel.search("")
-
-        viewModel.dataState.test {
-            assertThat(awaitItem()).isInstanceOf(DataState.Loading::class.java)
-            assertThat(awaitItem()).isInstanceOf(DataState.EmptyList::class.java)
+        viewModel.uiState.test {
+            assertThat(awaitItem()).isInstanceOf(UiState.Loading::class.java)
+            assertThat(awaitItem()).isInstanceOf(UiState.Success::class.java)
         }
     }
 
@@ -82,18 +85,9 @@ class AssetListViewModelTest {
         whenever(favoriteRepository.getFavorite()).thenReturn(listOf(SampleDataFactory.getAssetForDataBaseTest()))
 
         viewModel.getFavorite()
-        viewModel.dataState.test {
-            assertThat(awaitItem()).isInstanceOf(DataState.Success::class.java)
-        }
-    }
-
-    @Test
-    fun getFavoriteEmptyList() = runTest {
-        whenever(favoriteRepository.getFavorite()).thenReturn(emptyList())
-
-        viewModel.getFavorite()
-        viewModel.dataState.test {
-            assertThat(awaitItem()).isInstanceOf(DataState.EmptyList::class.java)
+        viewModel.uiState.test {
+            assertThat(awaitItem()).isInstanceOf(UiState.Loading::class.java)
+            assertThat(awaitItem()).isInstanceOf(UiState.Success::class.java)
         }
     }
 }

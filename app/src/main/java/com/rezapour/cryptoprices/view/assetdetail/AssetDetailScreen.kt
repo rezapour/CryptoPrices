@@ -1,4 +1,4 @@
-package com.rezapour.cryptoprices.view.compose
+package com.rezapour.cryptoprices.view.assetdetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,32 +13,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.rezapour.cryptoprices.R
 import com.rezapour.cryptoprices.data.Constance
-import com.rezapour.cryptoprices.util.DataState
 import com.rezapour.cryptoprices.model.AssetDetail
-import com.rezapour.cryptoprices.ui.theme.CryptoPricesTheme
-import com.rezapour.cryptoprices.view.view_models.AssetDetailViewModel
-import kotlinx.coroutines.CoroutineScope
+import com.rezapour.cryptoprices.util.UiState
+import com.rezapour.cryptoprices.view.compose.ErrorLabel
+import com.rezapour.cryptoprices.view.compose.ImageLoader
+import com.rezapour.cryptoprices.view.compose.Loading
 
 //TODO: The view is very simple.
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,16 +44,10 @@ fun AssetDetailScreen(
     if (assetId != null)
         viewModel.loadAssetDetail(assetId)
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
     Scaffold(
-        topBar = { TopBar(backButton) },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }) { paddingValues ->
+        topBar = { TopBar(backButton) }) { paddingValues ->
         Screen(
             viewModel,
-            snackbarHostState,
-            scope,
             { viewModel.loadAssetDetail(assetId!!) },
             Modifier.padding(paddingValues)
         )
@@ -70,36 +57,25 @@ fun AssetDetailScreen(
 @Composable
 fun Screen(
     viewModel: AssetDetailViewModel,
-    snackbarHostState: SnackbarHostState,
-    coroutineScope: CoroutineScope,
     retry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (val state = viewModel.dataState.collectAsState().value) {
-        is DataState.Error -> {
+    when (val state = viewModel.uiState.collectAsState().value) {
+        is UiState.Error -> {
             ContentSection(
-                asset = state.data, { ErrorLabel() },
+                asset = state.data, { ErrorLabel { retry() } },
                 modifier = modifier
             )
-
-            SnackBarItem(
-                snackbarHostState,
-                coroutineScope,
-                stringResource(id = R.string.error_default_message),
-                stringResource(R.string.retry)
-            ) { retry() }
         }
 
-        DataState.Loading -> {
+        UiState.Loading -> {
             Loading()
         }
 
-        is DataState.Success -> ContentSection(
+        is UiState.Success -> ContentSection(
             asset = state.data,
             modifier = modifier
         )
-
-        is DataState.EmptyList -> {}
     }
 }
 
@@ -148,17 +124,17 @@ fun DetailFirstPart(
 ) {
 
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        GlideImage(
-            model = Constance.getImageUrl(imageUrl?.replace("-", "")),
-            contentDescription = "Hello",
-            contentScale = ContentScale.Crop,
+
+        ImageLoader(
+            imageUrl = Constance.getImageUrl(
+                imageUrl?.replace("-", "")
+            ),
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
                 .padding(4.dp)
-        ) {
-            it.error(R.drawable.no_image)
-        }
+        )
+
         Column(
             modifier = Modifier
                 .padding(start = 16.dp)
@@ -217,19 +193,5 @@ fun DetailLabel(label: String, value: String, modifier: Modifier = Modifier) {
             modifier = modifier.padding(4.dp),
             style = MaterialTheme.typography.labelMedium
         )
-    }
-}
-
-@Preview
-@Composable
-fun DetailLablePreview() {
-    DetailLabel("ID", "BTC")
-}
-
-@Preview
-@Composable
-fun ContentSectionPreview() {
-    CryptoPricesTheme {
-//        ContentSection(asset = AssetDetail())
     }
 }
