@@ -56,6 +56,10 @@ class AssetListViewModel @Inject constructor(
         loadData()
     }
 
+    fun cleanList() {
+        _uiState.value = UiState.Success(emptyList())
+    }
+
     fun loadData() {
         _uiState.value = UiState.Loading
         viewModelScope.launch(Dispatchers.IO) {

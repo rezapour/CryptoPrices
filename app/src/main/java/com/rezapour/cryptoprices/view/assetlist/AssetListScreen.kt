@@ -5,27 +5,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rezapour.cryptoprices.R
@@ -35,11 +27,8 @@ import com.rezapour.cryptoprices.util.UiState
 import com.rezapour.cryptoprices.view.compose.AssetItem
 import com.rezapour.cryptoprices.view.compose.ErrorLabel
 import com.rezapour.cryptoprices.view.compose.Loading
-import com.rezapour.cryptoprices.view.compose.SnackBarItem
 import com.rezapour.cryptoprices.view.compose.TextMessage
 import com.rezapour.cryptoprices.view.compose.TopBar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +48,7 @@ fun AssetListScreen(
                 favoriteState = viewModel.favoriteState,
                 onSearchClicked = {
                     viewModel.updateSearchState(true)
-                    makeListClear = true
+
                 },
                 onFavoriteClicked = {
                     if (viewModel.favoriteState) {
@@ -82,7 +71,8 @@ fun AssetListScreen(
                 if (checked) viewModel.addFavorite(asset) else
                     viewModel.deleteFavorite(asset.assetId)
             },
-            modifier = Modifier.padding(padding)
+            modifier = modifier.padding(padding),
+            messageScreen = makeListClear
         )
     }
 }
@@ -94,35 +84,39 @@ fun Content(
     viewModel: AssetListViewModel,
     onItemClicked: (String) -> Unit,
     onFavoriteClicked: (Asset, Boolean) -> Unit,
+    messageScreen: Boolean
 ) {
-    when (uiState) {
-        is UiState.Error -> {
-            ContentItemState(
-                modifier = modifier,
-                assetItems = uiState.data,
-                showError = true,
-                topFavoriteState = viewModel.favoriteState,
-                onFavoriteItemClicked = onFavoriteClicked,
-                onItemClicked = onItemClicked,
-                onErrorLabelClicked = { viewModel.loadData() }
-            )
-        }
+    if (messageScreen) {
+        TextMessage(message = R.string.empty_list, modifier)
+    } else
+        when (uiState) {
+            is UiState.Error -> {
+                ContentItemState(
+                    modifier = modifier,
+                    assetItems = uiState.data,
+                    showError = true,
+                    topFavoriteState = viewModel.favoriteState,
+                    onFavoriteItemClicked = onFavoriteClicked,
+                    onItemClicked = onItemClicked,
+                    onErrorLabelClicked = { viewModel.loadData() }
+                )
+            }
 
-        UiState.Loading -> {
-            Loading()
-        }
+            UiState.Loading -> {
+                Loading()
+            }
 
-        is UiState.Success -> {
-            ContentItemState(
-                modifier = modifier,
-                assetItems = uiState.data,
-                showError = false,
-                topFavoriteState = viewModel.favoriteState,
-                onFavoriteItemClicked = onFavoriteClicked,
-                onItemClicked = onItemClicked
-            )
+            is UiState.Success -> {
+                ContentItemState(
+                    modifier = modifier,
+                    assetItems = uiState.data,
+                    showError = false,
+                    topFavoriteState = viewModel.favoriteState,
+                    onFavoriteItemClicked = onFavoriteClicked,
+                    onItemClicked = onItemClicked
+                )
+            }
         }
-    }
 }
 
 @Composable
@@ -197,31 +191,6 @@ fun AssetList(
         }
 
 
-    }
-}
-
-@Composable
-fun InfiniteListHandler(
-    listState: LazyListState,
-    buffer: Int = 1,
-    onLoadMore: () -> Unit
-) {
-    val loadMore = remember {
-        derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            val totalItemsNumber = layoutInfo.totalItemsCount
-            val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
-
-            lastVisibleItemIndex > (totalItemsNumber - buffer)
-        }
-    }
-
-    LaunchedEffect(loadMore) {
-        snapshotFlow { loadMore.value }
-            .distinctUntilChanged()
-            .collect {
-                onLoadMore()
-            }
     }
 }
 

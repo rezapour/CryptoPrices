@@ -1,6 +1,5 @@
 package com.rezapour.cryptoprices.data.repository.impl
 
-import androidx.paging.ExperimentalPagingApi
 import com.rezapour.cryptoprices.data.database.mapper.DataBaseMapper
 import com.rezapour.cryptoprices.data.database.room.dao.AssetDao
 import com.rezapour.cryptoprices.data.network.ApiProvider
@@ -10,6 +9,7 @@ import com.rezapour.cryptoprices.model.Asset
 import com.rezapour.cryptoprices.model.AssetDetail
 import com.rezapour.cryptoprices.util.DataState
 
+//TODO: For getting the assets the best practice is to use pagination.
 class AssetRepositoryImpl constructor(
     private val apiProvider: ApiProvider,
     private val dao: AssetDao,
@@ -31,7 +31,6 @@ class AssetRepositoryImpl constructor(
             )
         )
     }
-
 
     private suspend fun replaceAllAssets(assets: List<Asset>) {
         dao.deleteAll()
